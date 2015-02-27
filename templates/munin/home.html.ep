@@ -1,0 +1,30 @@
+% layout 'default';
+% title 'Home';
+
+% my $data = $config->getDatafile;
+
+% foreach my $group ($data->getGroups) {
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title text-capitalize"><%= $group %></h3>
+  </div>
+  <ul class="list-group">
+%   foreach my $host ($data->getHosts({'group' => $group})) {
+    <li class="list-group-item">
+      <div class="row">
+        <div class='text-left text-uppercase col-md-4'>
+          <a href="/host/<%= $host %>"><%= $host %></a>
+        </div>
+        <div class='text-right text-capitalize col-md-8'>
+        [
+%     foreach my $cat ($data->getGraphCategories({'group' => $group, 'host' => $host})) {
+          <a href="/host/<%= $host%>#<%= $cat %>"><%= $cat %></a>
+%     }
+        ]
+        </div>
+      </div>
+    </li>
+%   }
+  </ul>
+</div>
+% }
