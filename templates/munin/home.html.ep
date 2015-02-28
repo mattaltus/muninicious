@@ -17,7 +17,7 @@
         </div>
         <div class='text-right text-capitalize col-md-8'>
         <ul class='list-inline'>
-%     foreach my $cat (@{$host->service_categories}) {
+%     foreach my $cat (sort { lc($a) cmp lc($b) } @{$host->service_categories}) {
           <li><a href="/host/<%= $host->name %>#<%= $cat %>"><%= $cat %></a></li>
 %     }
         </ul>
