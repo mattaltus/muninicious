@@ -10,6 +10,7 @@ sub new {
 
   my $self = bless({}, $class);
 
+  $self->{'DBDIR'}     = $args->{'dbdir'};
   $self->{'FILENAME'}  = catfile($args->{'dbdir'}, $name);
   $self->{'TIMESTAMP'} = $self->get_ts();
   $self->{'DATA'}      = $self->_parse($self->{'FILENAME'});

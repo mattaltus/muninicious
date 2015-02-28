@@ -5,6 +5,11 @@ use warnings;
 
 use base qw/Muninicious::Munin::File/;
 
+use Muninicious::Munin::Group;
+use Muninicious::Munin::Host;
+use Muninicious::Munin::Service;
+use Muninicious::Munin::Field;
+
 use File::Spec::Functions qw/catfile/;
 use Carp qw/croak/;
 
@@ -27,105 +32,111 @@ sub _parse {
     chomp;
     next if (/^version\s/i);
     if ($_ =~ /^([^;]+);([^\:]+)\:([^\.]+)\.(.+)$/) {
-      my $group = $1;
-      my $host  = $2;
-      my $graph = $3;
-      $data->{$group}->{$host}->{$graph}->{'host'} = $host;
-      $data->{$group}->{$host}->{$graph}->{'group'} = $group;
-      $data->{$group}->{$host}->{$graph}->{'name'} = $graph;
+      my $group = $data->{$1};
+      if (!defined $group) {
+        $group = Muninicious::Munin::Group->new({'name' => $1});
+        $data->{$1} = $group;
+      }
+
+      my ($host) = $group->host_by_name($2);
+      if (!defined $host) {
+        $host = Muninicious::Munin::Host->new({'name' => $2});
+        $group->add_host($host);
+      }
+
+      my ($service) = $host->service_by_name($3);
+      if (!defined $service) {
+        $service = Muninicious::Munin::Service->new({'name' => $3});
+        $host->add_service($service);
+      }
+
       if ($4 =~ /^graph_(\S+)\s(.+)$/) {
-        $data->{$group}->{$host}->{$graph}->{'graph'}->{$1} = $2;
+        $service->metadata($1, $2);
       }
       elsif ($4 =~ /^([^\.]+)\.(\S+)\s(.+)$/) {
-        $data->{$group}->{$host}->{$graph}->{'value'}->{$1}->{$2} = $3;
+        my $field = $service->field_by_name($1);
+        if (!defined $field){
+          $field = Muninicious::Munin::Field->new({'name' => $1});
+          $service->add_field($field);
+        }
+        $field->metadata($2, $3);
       }
     }
   }
   close ($fd);
 
+  use Data::Dumper;
+  warn Dumper($data);
+
   return $data;
 }
 
-sub getGroups {
+sub groups {
   my ($self) = @_;
-  return sort keys %{$self->{'DATA'}};
+  return [sort { $a->name cmp $b->name } values %{$self->{'DATA'}}];
 }
 
-sub getHosts {
-  my ($self, $args) = @_;
-
-  my %list;
-  foreach my $group (keys %{$self->{'DATA'}}) {
-    if (!defined $args->{'group'} || $args->{'group'} eq $group) {
-      foreach my $host (keys %{$self->{'DATA'}->{$group}}) {
-        $list{$host} = 1;
-      }
-    }
-  }
-  return sort keys %list;
-}
-
-
-sub _filter_graphs {
+sub hosts {
   my ($self, $args) = @_;
 
   my @list;
-  foreach my $group (keys %{$self->{'DATA'}}) {
-    if (!defined $args->{'group'} || $args->{'group'} eq $group) {
-      foreach my $host (keys %{$self->{'DATA'}->{$group}}) {
-        if (!defined $args->{'host'} || $args->{'host'} eq $host) {
-          foreach my $graph (keys %{$self->{'DATA'}->{$group}->{$host}}) {
-            push(@list, $self->{'DATA'}->{$group}->{$host}->{$graph});
+  foreach my $group (values %{$self->{'DATA'}}) {
+    if (!defined $args->{'group'} || $args->{'group'} eq $group->name) {
+      foreach my $host (@{$group->hosts}) {
+        push(@list, $host);
+      }
+    }
+  }
+  return [sort { $a->name cmp $b->name } @list];
+}
+
+
+sub _filter_services {
+  my ($self, $args) = @_;
+
+  my @list;
+  foreach my $group (values %{$self->{'DATA'}}) {
+    if (!defined $args->{'group'} || $args->{'group'} eq $group->name) {
+      foreach my $host (@{$group->hosts}) {
+        if (!defined $args->{'host'} || $args->{'host'} eq $host->name) {
+          foreach my $service (@{$group->services}) {
+            push(@list, $service);
           }
         }
       }
     }
   }
 
-  use Data::Dumper;
-  warn Dumper(\@list);
-
   return \@list;
 }
 
-sub getGraphs {
+sub get_services {
   my ($self, $args) = @_;
 
-  my $graphs = $self->_filter_graphs($args);
+  my $services = $self->_filter_services($args);
+
+  return [sort { $a->name cmp $b->name } @$services];
+}
+
+
+sub get_service_categories {
+  my ($self, $args) = @_;
+
+  my $services = $self->_filter_services($args);
 
   my %list;
-  foreach my $graph (@$graphs) {
-    $list{$graph->{'name'}} = 1;
+  foreach my $service (@$services) {
+    my $category = $service->metadata('category');
+    $list{$category} = 1 if (defined $category);
   }
 
   return sort keys %list;
 }
 
+sub getRRDFile {
+  my ($self, $group, $host, $graph, $field) = @_;
 
-sub getGraphCategories {
-  my ($self, $args) = @_;
-
-  my $graphs = $self->_filter_graphs($args);
-
-  my %list;
-  foreach my $graph (@$graphs) {
-    $list{$graph->{'graph'}->{'category'}} = 1
-      if (defined $graph->{'graph'} && defined $graph->{'graph'}->{'category'});
-  }
-
-  return sort keys %list;
-}
-
-sub getGraphMetadata {
-  my ($self, $group, $host, $graph) = @_;
-
-  return $self->{'DATA'}->{$group}->{$host}->{$graph}->{'graph'};
-}
-
-sub getGraphFields {
-  my ($self, $group, $host, $graph) = @_;
-
-  return sort keys %{$self->{'DATA'}->{$group}->{$host}->{$graph}->{'value'}};
+  return catfile($self->{'DBDIR'}, $group, "$host-$graph-$field.rrd");
 }
 
 sub getGraphFieldMetadata {
