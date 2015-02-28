@@ -65,9 +65,6 @@ sub _parse {
   }
   close ($fd);
 
-  use Data::Dumper;
-  warn Dumper($data);
-
   return $data;
 }
 

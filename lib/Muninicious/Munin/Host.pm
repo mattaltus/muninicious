@@ -73,9 +73,6 @@ sub service_categories {
     $list{$category} = 1 if (defined $category);
   }
 
-  use Data::Dumper;
-  warn Dumper(sort keys %list);
-
   return [sort keys %list];
 }
 

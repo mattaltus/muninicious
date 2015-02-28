@@ -3,13 +3,13 @@
 
 % my $data = $config->getDatafile;
 
-% foreach my $group (@{$data->groups}) {
+% foreach my $group (sort { $a->name cmp $b->name } @{$data->groups}) {
 <div class="panel panel-default">
   <div class="panel-heading">
     <h3 class="panel-title text-capitalize"><%= $group->name %></h3>
   </div>
   <ul class="list-group">
-%   foreach my $host (@{$group->hosts}) {
+%   foreach my $host (sort { $a->name cmp $b->name } @{$group->hosts}) {
     <li class="list-group-item">
       <div class="row">
         <div class='text-left text-uppercase col-md-4'>
