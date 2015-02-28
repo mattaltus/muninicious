@@ -34,7 +34,7 @@ sub add_host {
   return;
 }
 
-sub filter_hosts {
+sub get_hosts_by_value {
   my ($self, $args) = @_;
 
   my @list;

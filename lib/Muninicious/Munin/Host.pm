@@ -43,7 +43,7 @@ sub add_service {
   return;
 }
 
-sub filter_hosts {
+sub get_services_by_value {
   my ($self, $args) = @_;
 
   my @list = @{$self->services};
@@ -56,6 +56,27 @@ sub filter_hosts {
       }
       else {
         push(@new_list, $service) if ($service->$key() eq $value);
+      }
+    }
+    @list = @new_list;
+  }
+
+  return \@list;
+}
+
+sub get_services_by_metadata {
+  my ($self, $args) = @_;
+
+  my @list = @{$self->services};
+  foreach my $key (keys %$args) {
+    my $value = $args->{$key};
+    my @new_list;
+    foreach my $service (@list) {
+      if (looks_like_number($value) || ref $value) {
+        push(@new_list, $service) if ($service->metadata($key) == $value);
+      }
+      else {
+        push(@new_list, $service) if ($service->metadata($key) eq $value);
       }
     }
     @list = @new_list;

@@ -1,9 +1,7 @@
 % layout 'default';
-% title 'Home';
+% title 'Muninlicious';
 
-% my $data = $config->getDatafile;
-
-% foreach my $group (sort { $a->name cmp $b->name } @{$data->groups}) {
+% foreach my $group (sort { $a->name cmp $b->name } @{$config->getDatafile->groups}) {
 <div class="panel panel-default">
   <div class="panel-heading">
     <h3 class="panel-title text-capitalize"><%= $group->name %></h3>
@@ -13,12 +11,12 @@
     <li class="list-group-item">
       <div class="row">
         <div class='text-left text-uppercase col-md-4'>
-          <a href="/host/<%= $host->name %>"><%= $host->name %></a>
+          <a href="<%= url_for("/page/".$group->name."/".$host->name) %>"><%= $host->name %></a>
         </div>
         <div class='text-right text-capitalize col-md-8'>
         <ul class='list-inline'>
 %     foreach my $cat (sort { lc($a) cmp lc($b) } @{$host->service_categories}) {
-          <li><a href="/host/<%= $host->name %>#<%= $cat %>"><%= $cat %></a></li>
+          <li><a href="<%= url_for("/page/".$group->name."/".$host->name."/".$cat) %>"><%= $cat %></a></li>
 %     }
         </ul>
         </div>

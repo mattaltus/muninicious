@@ -69,4 +69,13 @@ sub field_by_name {
   return;
 }
 
+
+sub get_graph_url {
+  my ($self, $type) = @_;
+
+#  return url_for('/graph/'.$self->host->group->name.'/'.$self->host->name.'/'.$self->name.'/'.$type);
+
+  return '';
+}
+
 1;

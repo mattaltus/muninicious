@@ -7,22 +7,23 @@ use Muninicious::Munin::Config;
 sub startup {
   my $self = shift;
 
-  # Documentation browser under "/perldoc"
-  $self->plugin('PODRenderer');
-
   my $config = Muninicious::Munin::Config->new('/etc/munin/munin.conf');
   $self->defaults('config' => $config);
 
   $self->hook(before_dispatch => sub {
     my $c = shift;
     $c->stash('config')->reload();
+    $c->stash('datafile' => $c->stash('config')->getDatafile());
   });
 
   # Router
   my $r = $self->routes;
 
-  # Normal route to controller
-  $r->get('/')->to('munin#home');
+  $r->get('/')->to(controller => 'munin', action => 'home');
+
+  $r->get('/page/:group/#host/:cat')->to(controller => 'munin', action => 'page', host => '*', group => '*', cat => '*');
+
+  $r->get('graph/:group/#host/:graph/:field')->to(controller => 'munin', action => 'graph', field => '*');
 }
 
 

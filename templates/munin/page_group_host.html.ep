@@ -1,0 +1,23 @@
+% layout 'default';
+% title $group->name.' - '.$host->name;
+
+<ul class="nav nav-tabs">
+% foreach my $cat (sort { lc($a) cmp lc($b) } @{$host->service_categories}) {
+% my $active = $category eq $cat ? 'active' : '';
+  <li class='text-capitalize <%= $active %>'><a href="<%= url_for("/page/".$group->name."/".$host->name."/".$cat) %>"><%= $cat %></a></li>
+% }
+</ul>
+&nbsp;
+% foreach my $service (sort { $a->metadata('title') cmp $b->metadata('title') } @{$host->get_services_by_metadata({'category' => $category})}) {
+<div class="panel panel-default">
+  <div class="panel-heading text-capitalize"><%= $service->metadata('title') %></div>
+  <div class="panel-body">
+    <div class='col-md-6'>
+      <img class="img-rounded" src="<%= $service->get_graph_url('day') %>">
+    </div>
+    <div class='col-md-6'>
+      <img class="img-rounded" src="<%= $service->get_graph_url('week') %>">
+    </div>
+  </div>
+</div>
+% }

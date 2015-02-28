@@ -73,6 +73,13 @@ sub groups {
   return [sort { $a->name cmp $b->name } values %{$self->{'data'}}];
 }
 
+sub group_by_name {
+  my ($self, $name) = @_;
+
+  return $self->{'data'}->{$name};
+}
+
+
 sub hosts {
   my ($self, $args) = @_;
 
