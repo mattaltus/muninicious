@@ -13,7 +13,7 @@ sub new {
 
   my $self = $class->SUPER::new('limits', $args);
 
-  $self->{'DATA'} = $self->_parse($self->{'FILENAME'});
+  $self->{'data'} = $self->_parse($self->{'filename'});
 
   return $self;
 }

@@ -18,7 +18,7 @@ sub new {
 
   my $self = $class->SUPER::new('datafile', $args);
 
-  $self->{'DATA'} = $self->_parse($self->{'FILENAME'});
+  $self->{'data'} = $self->_parse($self->{'filename'});
 
   return $self;
 }
@@ -70,14 +70,14 @@ sub _parse {
 
 sub groups {
   my ($self) = @_;
-  return [sort { $a->name cmp $b->name } values %{$self->{'DATA'}}];
+  return [sort { $a->name cmp $b->name } values %{$self->{'data'}}];
 }
 
 sub hosts {
   my ($self, $args) = @_;
 
   my @list;
-  foreach my $group (values %{$self->{'DATA'}}) {
+  foreach my $group (values %{$self->{'data'}}) {
     if (!defined $args->{'group'} || $args->{'group'} eq $group->name) {
       foreach my $host (@{$group->hosts}) {
         push(@list, $host);
@@ -92,7 +92,7 @@ sub _filter_services {
   my ($self, $args) = @_;
 
   my @list;
-  foreach my $group (values %{$self->{'DATA'}}) {
+  foreach my $group (values %{$self->{'data'}}) {
     if (!defined $args->{'group'} || $args->{'group'} eq $group->name) {
       foreach my $host (@{$group->hosts}) {
         if (!defined $args->{'host'} || $args->{'host'} eq $host->name) {
@@ -133,13 +133,13 @@ sub get_service_categories {
 sub getRRDFile {
   my ($self, $group, $host, $graph, $field) = @_;
 
-  return catfile($self->{'DBDIR'}, $group, "$host-$graph-$field.rrd");
+  return catfile($self->{'dbdir'}, $group, "$host-$graph-$field.rrd");
 }
 
 sub getGraphFieldMetadata {
   my ($self, $group, $host, $graph, $field) = @_;
 
-  return $self->{'DATA'}->{$group}->{$host}->{$graph}->{'value'}->{$field};
+  return $self->{'data'}->{$group}->{$host}->{$graph}->{'value'}->{$field};
 }
 
 

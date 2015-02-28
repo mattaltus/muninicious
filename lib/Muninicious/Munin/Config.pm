@@ -15,10 +15,10 @@ sub new {
   my ($class, $filename) = @_;
 
   my $self = bless({}, $class);
-  $self->{'FILENAME'} = $filename;
-  $self->{'DBDIR'}    = $ENV{'MUNIN_DB_DIR'} || $self->get_param('dbdir');
-  $self->{'DATAFILE'} = Muninicious::Munin::Datafile->new({'dbdir' => $self->{'DBDIR'}});
-  $self->{'LIMITS'}   = Muninicious::Munin::Limits->new({'dbdir' => $self->{'DBDIR'}});
+  $self->{'filename'} = $filename;
+  $self->{'dbdir'}    = $ENV{'MUNIN_DB_DIR'} || $self->get_param('dbdir');
+  $self->{'datafile'} = Muninicious::Munin::Datafile->new({'dbdir' => $self->{'dbdir'}});
+  $self->{'limits'}   = Muninicious::Munin::Limits->new({'dbdir' => $self->{'dbdir'}});
 
   return $self;
 }
@@ -27,7 +27,7 @@ sub get_param {
   my ($self, $name) = @_;
 
   my $value;
-  open (my $fh, "<", $self->{'FILENAME'}) || croak "Error opening config file";
+  open (my $fh, "<", $self->{'filename'}) || croak "Error opening config file";
   while (<$fh>) {
     if ($_ =~ /^\s*\Q$name\E\s+([^#])/){
       $value = $1;
@@ -42,8 +42,8 @@ sub get_param {
 sub reload {
   my ($self) = @_;
 
-  $self->{'DATAFILE'}->reload();
-  $self->{'LIMITS'}->reload();
+  $self->{'datafile'}->reload();
+  $self->{'limits'}->reload();
 
   return;
 }
@@ -51,13 +51,13 @@ sub reload {
 sub getDatafile {
   my ($self) = @_;
 
-  return $self->{'DATAFILE'};
+  return $self->{'datafile'};
 }
 
 sub getLimits {
   my ($self) = @_;
 
-  return $self->{'LIMITS'};
+  return $self->{'limits'};
 }
 
 1;
