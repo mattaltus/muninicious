@@ -38,10 +38,10 @@
   <div class="panel-heading text-capitalize"><%= $service->metadata('title') %></div>
   <div class="panel-body">
     <div class='col-md-6'>
-      <img class="img-rounded" src="<%= $service->get_graph_url('day') %>">
+      <img class="img-rounded" src="<%= url_for($service->get_graph_url('day')) %>">
     </div>
     <div class='col-md-6'>
-      <img class="img-rounded" src="<%= $service->get_graph_url('week') %>">
+      <img class="img-rounded" src="<%= url_for($service->get_graph_url('week')) %>">
     </div>
   </div>
 </div>

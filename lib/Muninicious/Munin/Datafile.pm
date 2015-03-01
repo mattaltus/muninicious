@@ -56,7 +56,7 @@ sub _parse {
       elsif ($4 =~ /^([^\.]+)\.(\S+)\s(.+)$/) {
         my $field = $service->field_by_name($1);
         if (!defined $field){
-          $field = Muninicious::Munin::Field->new({'name' => $1});
+          $field = Muninicious::Munin::Field->new({'name' => $1, 'dbdir' => $self->{'dbdir'}});
           $service->add_field($field);
         }
         $field->metadata($2, $3);
@@ -135,18 +135,6 @@ sub get_service_categories {
   }
 
   return sort keys %list;
-}
-
-sub getRRDFile {
-  my ($self, $group, $host, $graph, $field) = @_;
-
-  return catfile($self->{'dbdir'}, $group, "$host-$graph-$field.rrd");
-}
-
-sub getGraphFieldMetadata {
-  my ($self, $group, $host, $graph, $field) = @_;
-
-  return $self->{'data'}->{$group}->{$host}->{$graph}->{'value'}->{$field};
 }
 
 

@@ -50,13 +50,28 @@ sub graph {
 
   my $config = $self->stash('config');
 
-  my $group = $self->param('group');
-  my $host  = $self->param('host');
-  my $graph = $self->param('graph');
-  my $field = $self->param('graph');
+  my $group_name   = $self->param('group');
+  my $host_name    = $self->param('host');
+  my $service_name = $self->param('service');
+  my $type         = $self->param('type');
 
+  my $group   = $self->stash('datafile')->group_by_name($group_name);
+  my $host    = $group->host_by_name($host_name);
+  my $service = $host->service_by_name($service_name);
 
+  my $rrd_args = $service->get_rrd_graph_args($type, '-');
 
+  my $command = 'rrdtool graph '.join(' ', map {"'".$_."'"} @$rrd_args);
+  open(my $rrd, '-|', $command) || die 'Error rrdtool graph: $!';
+  binmode($rrd);
+  my $data;
+  my $buffer;
+  while(read($rrd, $buffer, 1024) > 0){
+    $data .= $buffer;
+  }
+  close($rrd);
+
+  $self->render(data => $data, format => 'png');
 }
 
 

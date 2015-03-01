@@ -13,7 +13,6 @@ sub new {
   $self->{'dbdir'}     = $args->{'dbdir'};
   $self->{'filename'}  = catfile($args->{'dbdir'}, $name);
   $self->{'timestamp'} = $self->get_ts();
-  $self->{'data'}      = $self->_parse($self->{'filename'});
 
   return $self;
 }
