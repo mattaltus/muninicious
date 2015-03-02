@@ -3,7 +3,10 @@
 use strict;
 use warnings;
 
-use lib 'lib';
+use Cwd qw/abs_path/;
+use File::Basename qw/dirname/;
+use File::Spec::Functions qw/catdir catfile/;
+use lib catdir(abs_path(dirname(__FILE__)), '..', 'lib');
 
 # Start command line interface for application
 require Mojolicious::Commands;
