@@ -145,10 +145,16 @@ sub get_rrd_graph_args {
     push(@args, 'DEF:l'.$field->get_rrd_name.'='.$field->get_rrd_file.':42:MIN');
     push(@args, 'DEF:h'.$field->get_rrd_name.'='.$field->get_rrd_file.':42:MAX');
     push(@args, 'CDEF:n'.$field->get_rrd_name.'=a'.$field->get_rrd_name);
-    push(@args, 'HRULE:'.$field->metadata('warning').'#0066B3')
-      if (defined $field->metadata('warning'));
-    push(@args, 'HRULE:'.$field->metadata('critical').'#FF0000')
-      if (defined $field->metadata('critical'));
+    if (defined $field->metadata('warning')) {
+      foreach my $limit (split(/\:/, $field->metadata('warning'))) {
+        push(@args, 'HRULE:'.$limit.'#0066B3')
+      }
+    }
+    if (defined $field->metadata('critical')) {
+      foreach my $limit (split(/\:/, $field->metadata('critical'))) {
+        push(@args, 'HRULE:'.$limit.'#FF0000')
+      }
+    }
   }
   push(@args, 'COMMENT:                  ');
   push(@args, 'COMMENT: Cur\\:');
@@ -169,6 +175,15 @@ sub get_rrd_graph_args {
   foreach my $field (@{$self->fields}) {
     my $colour = $field->metadata('colour') || $field->metadata('color') || $palette[$palette_index++];
     my $type   = $field->metadata('draw') || 'LINE1';
+    if ($type eq 'AREASTACK') {
+      if ($field eq $self->fields->[0]) {
+        $type = 'AREA';
+      }
+      else {
+        $type = 'STACK';
+      }
+    }
+
     push(@args, $type.':a'.$field->get_rrd_name.'#'.$colour.':'.
                   sprintf("%-${max_label_length}s", $field->metadata('label')));
     push(@args, 'GPRINT:n'.$field->get_rrd_name.':LAST:%6.2lf%s');
