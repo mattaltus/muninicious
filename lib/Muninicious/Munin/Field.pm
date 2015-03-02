@@ -3,7 +3,6 @@ package Muninicious::Munin::Field;
 use strict;
 use warnings;
 
-use Digest::MD5 qw/md5_hex/;
 use File::Spec::Functions qw/catfile/;
 
 sub new {
@@ -73,7 +72,7 @@ sub get_rrd_file {
 sub get_rrd_name {
   my ($self) = @_;
 
-  return substr(md5_hex($self->name), 0, 10);
+  return $self->name;
 }
 
 1;
