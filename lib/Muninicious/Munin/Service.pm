@@ -175,9 +175,9 @@ sub get_rrd_graph_args {
   foreach my $field (@{$self->fields}) {
     my $colour = $field->metadata('colour') || $field->metadata('color') || $palette[$palette_index++];
     my $type   = $field->metadata('draw') || 'LINE1';
-    if ($type eq 'AREASTACK') {
+    if ($type =~ /(LINE|AREA)STACK/) {
       if ($field eq $self->fields->[0]) {
-        $type = 'AREA';
+        $type = $1;
       }
       else {
         $type = 'STACK';
