@@ -1,5 +1,5 @@
 % layout 'default';
-% title 'Muninlicious';
+% title 'Home';
 
 % foreach my $group (sort { $a->name cmp $b->name } @{$config->getDatafile->groups}) {
 <div class="panel panel-default">
