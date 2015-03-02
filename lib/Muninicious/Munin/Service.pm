@@ -145,8 +145,11 @@ sub get_rrd_graph_args {
     push(@args, 'DEF:l'.$field->get_rrd_name.'='.$field->get_rrd_file.':42:MIN');
     push(@args, 'DEF:h'.$field->get_rrd_name.'='.$field->get_rrd_file.':42:MAX');
     push(@args, 'CDEF:n'.$field->get_rrd_name.'=a'.$field->get_rrd_name);
+    push(@args, 'HRULE:'.$field->metadata('warning').'#0066B3')
+      if (defined $field->metadata('warning'));
+    push(@args, 'HRULE:'.$field->metadata('critical').'#FF0000')
+      if (defined $field->metadata('critical'));
   }
-  push(@args, 'HRULE:6300000000#0066B3');
   push(@args, 'COMMENT:                  ');
   push(@args, 'COMMENT: Cur\\:');
   push(@args, 'COMMENT:Min\\:');
