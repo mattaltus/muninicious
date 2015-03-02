@@ -64,6 +64,13 @@ sub metadata {
     return $self->{'metadata'};
   }
   elsif (!defined $value) {
+    my $str = $self->{'metadata'}->{$attr};
+    if (defined $str && $str =~ /\$\{graph_(.*)\}/) {
+      my $replace = $self->{'metadata'}->{$1};
+      $replace = 'second' if (!defined $replace && $1 eq 'period');
+      $str =~ s/\$\{graph_\Q$1\E\}/$replace/g;
+      return $str;
+    }
     return $self->{'metadata'}->{$attr};
   }
   else {
