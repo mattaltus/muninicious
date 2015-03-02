@@ -11,10 +11,13 @@ sub new {
   my $self = bless({}, $class);
   $self->{'metadata'} = {};
   $self->{'fields'}   = [];
+  $self->{'children'} = [];
   $self->name($args->{'name'});
   $self->host($args->{'host'});
   $self->metadata($args->{'metadata'});
   $self->fields($args->{'fields'});
+  $self->children($args->{'children'});
+  $self->parent($args->{'parent'});
 
   return $self;
 }
@@ -29,6 +32,18 @@ sub host {
   my ($self, $host) = @_;
   $self->{'host'} = $host if (defined $host);
   return $self->{'host'};
+}
+
+sub children {
+  my ($self, $children) = @_;
+  $self->{'children'} = $children if (defined $children);
+  return $self->{'children'};
+}
+
+sub parent {
+  my ($self, $parent) = @_;
+  $self->{'parent'} = $parent if (defined $parent);
+  return $self->{'parent'};
 }
 
 sub fields {
@@ -97,15 +112,30 @@ sub field_by_name {
   return;
 }
 
+sub add_child {
+  my ($self, $child) = @_;
+  push(@{$self->{'children'}}, $child);
+  return;
+}
+
+sub child_by_name {
+  my ($self, $name) = @_;
+
+  foreach my $child (@{$self->{'children'}}){
+    if ($child->name eq $name) {
+      return $child;
+    }
+  }
+  return;
+}
 
 sub get_graph_url {
   my ($self, $type) = @_;
 
+  if ($self->parent) {
+    return '/graph/'.$self->host->group->name.'/'.$self->host->name.'/'.$self->parent->name.'/'.$self->name.'/'.$type;
+  }
   return '/graph/'.$self->host->group->name.'/'.$self->host->name.'/'.$self->name.'/'.$type;
-
-  my $url = 'https://monitor.altus.id.au/munin-cgi/munin-cgi-graph/'.$self->host->group->name.'/'.$self->host->name.'/'.$self->name.'-'.$type.'.png';
-
-  return $url;
 }
 
 sub get_graph {

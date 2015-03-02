@@ -79,12 +79,12 @@ sub _push_defs {
   push(@$args, 'CDEF:n'.$field->get_rrd_name.'=a'.$field->get_rrd_name);
   if (defined $field->metadata('warning')) {
     foreach my $limit (split(/\:/, $field->metadata('warning'))) {
-      push(@$args, 'HRULE:'.$limit.'#0066B3')
+      push(@$args, 'HRULE:'.$limit.'#0066B3') if ($limit ne '');
     }
   }
   if (defined $field->metadata('critical')) {
     foreach my $limit (split(/\:/, $field->metadata('critical'))) {
-      push(@$args, 'HRULE:'.$limit.'#FF0000')
+      push(@$args, 'HRULE:'.$limit.'#FF0000') if ($limit ne '');
     }
   }
   return;
@@ -141,8 +141,8 @@ sub _push_labels {
     my $cdef = (defined $field->metadata('cdef')) ? 'cdef' : '';
     push(@$args, 'CDEF:ngcdef'.$field->get_rrd_name.'=n'.$cdef.$field->get_rrd_name.',-1,*');
     push(@$args, $type.':ngcdef'.$field->get_rrd_name.'#'.$colour);
-    push(@$args, 'CDEF:re_zero=n'.$cdef.$field->get_rrd_name.',UN,0,0,IF');
-    push(@$args, 'LINE1:re_zero#000000');
+    push(@$args, 'CDEF:re_zero'.$cdef.$field->get_rrd_name.'=n'.$cdef.$field->get_rrd_name.',UN,0,0,IF');
+    push(@$args, 'LINE1:re_zero'.$cdef.$field->get_rrd_name.'#000000');
   }
 }
 
@@ -252,8 +252,6 @@ sub get_rrd_args {
 
   push(@args, '--end');
   push(@args, time());
-
-  warn Data::Dumper::Dumper(\@args);
 
   return \@args;
 }

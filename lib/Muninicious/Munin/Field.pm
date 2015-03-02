@@ -61,12 +61,15 @@ sub get_rrd_file {
     'COUNTER'  => 'c',
   };
 
-  my $filename = catfile($self->dbdir, $self->service->host->group->name,
-    $self->service->host->name.'-'.$self->service->name.'-'.$self->name.'-'.
-    $type_suffix->{$self->metadata('type') || 'GAUGE'}.
-    '.rrd');
+  my $group = $self->service->host->group->name;
+  $group = $self->service->parent->host->group->name if (defined $self->service->parent);
 
-  return $filename;
+  my $filename = $self->service->host->name.'-'.$self->service->name.'-';
+  $filename   .= $self->service->parent->name.'-' if ($self->service->parent);
+  $filename   .= $self->name.'-';
+  $filename   .= $type_suffix->{$self->metadata('type') || 'GAUGE'}.'.rrd';
+
+  return catfile($self->dbdir, $group, $filename);
 }
 
 sub get_rrd_name {

@@ -53,6 +53,29 @@ sub _parse {
       if ($4 =~ /^graph_(\S+)\s(.+)$/) {
         $service->metadata($1, $2);
       }
+      elsif ($4 =~ /^([^\.]+)\.graph_(\S+)\s(.+)$/) {
+        my $child = $service->child_by_name($1);
+        if (!defined $child) {
+          $child = Muninicious::Munin::Service->new({'name' => $1});
+          $service->add_child($child);
+        }
+        $child->metadata($2, $3);
+      }
+      elsif ($4 =~ /^([^\.]+)\.([^\.]+)\.(\S+)\s(.+)$/) {
+        my $child = $service->child_by_name($1);
+        if (!defined $child) {
+          $child = Muninicious::Munin::Service->new({'name' => $1});
+          $service->add_child($child);
+        }
+        my $field = $child->field_by_name($2);
+        if (!defined $field){
+          $field = Muninicious::Munin::Field->new({'name' => $2, 'dbdir' => $self->{'dbdir'}});
+          $child->add_field($field);
+        }
+        else {
+          $field->metadata($3, $4);
+        }
+      }
       elsif ($4 =~ /^([^\.]+)\.(\S+)\s(.+)$/) {
         my $field = $service->field_by_name($1);
         if (!defined $field){
@@ -61,6 +84,15 @@ sub _parse {
         }
         $field->metadata($2, $3);
       }
+      elsif ($4 =~ /^host_name\s+(.+)$/) {
+        # ignore host_lines.
+      }
+      else {
+        warn "Unmatched line: $_";
+      }
+    }
+    else {
+      warn "Unmatched line: $_";
     }
   }
   close ($fd);
