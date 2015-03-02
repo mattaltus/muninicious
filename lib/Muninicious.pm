@@ -19,6 +19,9 @@ sub startup {
   # Router
   my $r = $self->routes;
 
+  # Because the namespace changes between mojo versions...
+  $r->namespaces(['Muninicious::Controller']);
+
   $r->get('/')->to(controller => 'munin', action => 'home');
 
   $r->get('/page/:group/#host/:cat')->to(controller => 'munin', action => 'page', host => '*', group => '*', cat => '*');
