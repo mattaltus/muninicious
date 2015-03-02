@@ -59,19 +59,13 @@ sub graph {
   my $host    = $group->host_by_name($host_name);
   my $service = $host->service_by_name($service_name);
 
-  my $rrd_args = $service->get_rrd_graph_args($type, '-');
+  my $graph = $service->get_graph($type);
 
-  my $command = 'rrdtool graph '.join(' ', map {"'".$_."'"} @$rrd_args);
-  open(my $rrd, '-|', $command) || die 'Error rrdtool graph: $!';
-  binmode($rrd);
-  my $data;
-  my $buffer;
-  while(read($rrd, $buffer, 1024) > 0){
-    $data .= $buffer;
-  }
-  close($rrd);
+  my $png = $graph->get_png_data();
 
-  $self->render(data => $data, format => 'png');
+  $self->render(data => $png, format => 'png');
+
+  return;
 }
 
 
