@@ -9,7 +9,19 @@ sub home {
 }
 
 
-sub page {
+sub page_group {
+  my $self = shift;
+
+  my $group_name = $self->param('group');
+
+  my $group = $self->stash('datafile')->group_by_name($group_name);
+  $self->stash('group' => $group);
+
+  $self->render(template => 'munin/page_group');
+  return;
+}
+
+sub page_host {
   my $self = shift;
 
   my $group_name = $self->param('group') || '*';
@@ -30,11 +42,7 @@ sub page {
   $self->stash('category' => $cat_name);
 
   if (defined $group && defined $host) {
-    $self->render(template => 'munin/page_group_host');
-    return;
-  }
-  if (defined $group && ! defined $host) {
-    $self->render(template => 'munin/page_group');
+    $self->render(template => 'munin/page_host');
     return;
   }
 

@@ -24,7 +24,8 @@ sub startup {
 
   $r->get('/')->to(controller => 'munin', action => 'home');
 
-  $r->get('/page/:group/#host/:cat')->to(controller => 'munin', action => 'page', host => '*', group => '*', cat => '*');
+  $r->get('/page/:group/')->to(controller => 'munin', action => 'page_group');
+  $r->get('/page/:group/#host/:cat')->to(controller => 'munin', action => 'page_host', host => '*', group => '*', cat => '*');
 
   $r->get('graph/:group/#host/:service/:type')->to(controller => 'munin', action => 'graph', type => 'day');
   $r->get('graph/:group/#host/:service/:child/:type')->to(controller => 'munin', action => 'graph', type => 'day');

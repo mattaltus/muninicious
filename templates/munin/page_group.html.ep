@@ -1,0 +1,22 @@
+% layout 'default';
+% title $group->name;
+
+% foreach my $host (sort { $a->name cmp $b->name } @{$group->hosts}) {
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title text-uppercase">
+      <a href="<%= url_for("/page/".$group->name."/".$host->name) %>">
+        <%= $host->name %></h3>
+      </a>
+  </div>
+  <ul class="list-group">
+%   foreach my $service (sort { lc($a->name) cmp lc($b->name) } @{$host->services}) {
+    <li class="list-group-item text-capitalize">
+      <a href="<%= url_for("/page/".$group->name."/".$host->name."/".$service->name) %>">
+        <%= $service->metadata('title') %>
+      </a>
+    </li>
+%   }
+  </ul>
+</div>
+% }
