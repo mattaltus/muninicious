@@ -93,7 +93,7 @@ sub graph {
     my $host_name    = $self->param('host')    || die 'No host specified';
     my $service_name = $self->param('service') || die 'No service specified';
     my $type         = $self->param('type')    || die 'No type specified';
-    my $child        = $self->param('child')   || die 'No child specified';
+    my $child        = $self->param('child');
 
     my $group   = $self->stash('datafile')->group_by_name($group_name) || die "Group $group_name not found";
     my $host    = $group->host_by_name($host_name) || die "Host $host_name not found";
