@@ -57,13 +57,24 @@ sub service {
     my $group_name   = $self->param('group')   || die 'No group specified';
     my $host_name    = $self->param('host')    || die 'No host specified';
     my $service_name = $self->param('service') || die 'No service specified';
+    my $child_name   = $self->param('child');
 
-    my $group = $self->stash('datafile')->group_by_name($group_name);
+    my $group = $self->stash('datafile')->group_by_name($group_name) || die "Group $group_name not found";
     $self->stash('group' => $group);
-    my $host = $group->host_by_name($host_name);
+    my $host = $group->host_by_name($host_name) || die "Host $host_name not found";
     $self->stash('host' => $host);
-    my $service = $host->service_by_name($service_name);
-    $self->stash('service' => $service);
+    if (defined $child_name) {
+      my $parent = $host->service_by_name($service_name) || die "Service $service_name not found";
+      $self->stash('parent' => $parent);
+      my $service;
+      $service = $parent->child_by_name($child_name) || die "Child $child_name not found";
+      $self->stash('service' => $service);
+    }
+    else {
+      my $service = $host->service_by_name($service_name) || die "Service $service_name not found";
+      $self->stash('service' => $service);
+      $self->stash('parent'  => undef);
+    }
 
     $self->render(template => 'munin/service');
     return;
@@ -77,28 +88,32 @@ sub service {
 sub graph {
   my $self = shift;
 
-  my $config = $self->stash('config');
+  eval {
+    my $group_name   = $self->param('group')   || die 'No group specified';
+    my $host_name    = $self->param('host')    || die 'No host specified';
+    my $service_name = $self->param('service') || die 'No service specified';
+    my $type         = $self->param('type')    || die 'No type specified';
+    my $child        = $self->param('child')   || die 'No child specified';
 
-  my $group_name   = $self->param('group');
-  my $host_name    = $self->param('host');
-  my $service_name = $self->param('service');
-  my $type         = $self->param('type');
-  my $child        = $self->param('child');
+    my $group   = $self->stash('datafile')->group_by_name($group_name) || die "Group $group_name not found";
+    my $host    = $group->host_by_name($host_name) || die "Host $host_name not found";
+    my $service = $host->service_by_name($service_name) || die "Service $service_name not found";
+    if (defined $child) {
+      $service = $service->child_by_name($child) || die "Service $child not found";
+    }
 
-  my $group   = $self->stash('datafile')->group_by_name($group_name);
-  my $host    = $group->host_by_name($host_name);
-  my $service = $host->service_by_name($service_name);
-  if (defined $child) {
-    $service = $service->child_by_name($child);
+    my $graph = $service->get_graph($type) || die "Could not generate graph";
+
+    my $png = $graph->get_png_data() || die "Failed to retrieve png data";
+
+    $self->render(data => $png, format => 'png');
+
+    return;
+  };
+  if ($@) {
+    $self->render(text => "Error: $@", status => 500);
+    return;
   }
-
-  my $graph = $service->get_graph($type);
-
-  my $png = $graph->get_png_data();
-
-  $self->render(data => $png, format => 'png');
-
-  return;
 }
 
 

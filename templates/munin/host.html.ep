@@ -1,7 +1,7 @@
 % layout 'default';
 % title $group->name.' - '.$host->name;
 
-<%= include 'munin/breadcrumbs', group => $group, host => $host, service => undef %>
+<%= include 'munin/breadcrumbs', group => $group, host => $host, parent => undef, service => undef %>
 
 <ul class="nav nav-tabs">
 % foreach my $cat (sort { lc($a) cmp lc($b) } @{$host->service_categories}) {

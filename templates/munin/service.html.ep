@@ -1,7 +1,7 @@
 % layout 'default';
 % title $group->name.' - '.$host->name.' - '.$service->metadata('title');
 
-<%= include 'munin/breadcrumbs', group => $group, host => $host, service => $service %>
+<%= include 'munin/breadcrumbs', group => $group, host => $host, parent => $parent, service => $service %>
 
 <div class="panel panel-default">
   <div class="panel-heading text-capitalize"><%= $service->metadata('title') %></div>
