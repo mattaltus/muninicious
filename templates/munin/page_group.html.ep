@@ -10,7 +10,7 @@
       </a>
   </div>
   <ul class="list-group">
-%   foreach my $service (sort { lc($a->name) cmp lc($b->name) } @{$host->services}) {
+%   foreach my $service (sort { lc($a->metadata('title')) cmp lc($b->metadata('title')) } @{$host->services}) {
     <li class="list-group-item text-capitalize">
       <a href="<%= url_for("/page/".$group->name."/".$host->name."/".$service->name) %>">
         <%= $service->metadata('title') %>
