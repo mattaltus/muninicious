@@ -108,4 +108,10 @@ sub service_by_name {
   return;
 }
 
+sub get_page_url {
+  my ($self) = @_;
+
+  return '/host/'.$self->group->name.'/'.$self->name;
+}
+
 1;

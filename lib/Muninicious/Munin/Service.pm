@@ -138,6 +138,18 @@ sub get_graph_url {
   return '/graph/'.$self->host->group->name.'/'.$self->host->name.'/'.$self->name.'/'.$type;
 }
 
+sub get_page_url {
+  my ($self) = @_;
+
+  if ($self->parent) {
+    return '/service/'.$self->host->group->name.'/'.$self->host->name.'/'.$self->parent->name.'/'.$self->name;
+  }
+  if (@{$self->children}) {
+    return '/child/'.$self->host->group->name.'/'.$self->host->name.'/'.$self->name;
+  }
+  return '/service/'.$self->host->group->name.'/'.$self->host->name.'/'.$self->name;
+}
+
 sub get_graph {
   my ($self, $type) = @_;
 

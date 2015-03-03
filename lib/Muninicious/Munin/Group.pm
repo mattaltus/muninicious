@@ -66,4 +66,10 @@ sub host_by_name {
   return;
 }
 
+sub get_page_url {
+  my ($self) = @_;
+
+  return '/group/'.$self->name;
+}
+
 1;
