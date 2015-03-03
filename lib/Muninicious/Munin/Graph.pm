@@ -269,8 +269,6 @@ sub get_rrd_args {
   push(@args, '--end');
   push(@args, time());
 
-  warn Data::Dumper::Dumper(\@args);
-
   return \@args;
 }
 
