@@ -56,7 +56,7 @@ sub _parse {
       elsif ($4 =~ /^([^\.]+)\.graph_(\S+)\s(.+)$/) {
         my $child = $service->child_by_name($1);
         if (!defined $child) {
-          $child = Muninicious::Munin::Service->new({'name' => $1});
+          $child = Muninicious::Munin::Service->new({'name' => $1, 'host' => $host, 'parent' => $service});
           $service->add_child($child);
         }
         $child->metadata($2, $3);
@@ -64,7 +64,7 @@ sub _parse {
       elsif ($4 =~ /^([^\.]+)\.([^\.]+)\.(\S+)\s(.+)$/) {
         my $child = $service->child_by_name($1);
         if (!defined $child) {
-          $child = Muninicious::Munin::Service->new({'name' => $1});
+          $child = Muninicious::Munin::Service->new({'name' => $1, 'host' => $host, 'parent' => $service});
           $service->add_child($child);
         }
         my $field = $child->field_by_name($2);

@@ -54,10 +54,14 @@ sub graph {
   my $host_name    = $self->param('host');
   my $service_name = $self->param('service');
   my $type         = $self->param('type');
+  my $child        = $self->param('child');
 
   my $group   = $self->stash('datafile')->group_by_name($group_name);
   my $host    = $group->host_by_name($host_name);
   my $service = $host->service_by_name($service_name);
+  if (defined $child) {
+    $service = $service->child_by_name($child);
+  }
 
   my $graph = $service->get_graph($type);
 
