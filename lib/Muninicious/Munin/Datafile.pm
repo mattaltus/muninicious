@@ -56,6 +56,7 @@ sub _parse {
         $service->metadata($1, $2);
       }
       elsif ($4 =~ /^([^\.]+)\.graph_(\S+)\s(.+)$/) {
+        next if ($2 eq 'data_size');
         my $child = $service->child_by_name($1);
         if (!defined $child) {
           $child = Muninicious::Munin::Service->new({'name' => $1, 'host' => $host, 'parent' => $service});
