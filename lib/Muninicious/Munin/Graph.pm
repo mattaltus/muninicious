@@ -221,7 +221,7 @@ sub get_rrd_args {
   push(@args, '--border', '0');
   push(@args, '-W', 'Muninicious');
 
-  foreach my $field (@{$self->_get_applicable_fields}) {
+  foreach my $field (@{$self->service->fields}) {
     $self->_push_defs(\@args, $field);
     $self->_push_cdefs(\@args, $field);
   }

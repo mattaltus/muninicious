@@ -74,9 +74,7 @@ sub _parse {
           $field = Muninicious::Munin::Field->new({'name' => $2, 'dbdir' => $self->{'dbdir'}});
           $child->add_field($field);
         }
-        else {
-          $field->metadata($3, $4);
-        }
+        $field->metadata($3, $4);
       }
       elsif ($4 =~ /^([^\.]+)\.(\S+)\s(.+)$/) {
         my $field = $service->field_by_name($1);
