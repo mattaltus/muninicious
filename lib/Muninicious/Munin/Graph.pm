@@ -48,6 +48,7 @@ has name          => undef;
 has filename      => '-';
 has palette_index => 0;
 has stack         => 0;
+has graph_colours => sub { return {} };
 
 
 sub _get_applicable_fields {
@@ -95,7 +96,7 @@ sub _get_max_label_length {
 
   my $max_label_length = 0;
   foreach my $field (@{$self->_get_applicable_fields}) {
-    if (length($field->metadata('label')) > $max_label_length) {
+    if (length($field->metadata('label') || '') > $max_label_length) {
       $max_label_length = length($field->metadata('label'));
     }
   }
@@ -121,7 +122,15 @@ sub _push_labels {
   return 0 if (defined $field->metadata('graph') && $field->metadata('graph') eq 'no' && !$is_negative);
 
   my $max_label_length = $self->_get_max_label_length();
-  my $colour = $field->metadata('colour') || $field->metadata('color') || $self->_get_palette_colour();
+  my $colour = $field->metadata('colour') || $field->metadata('color');
+
+  $colour = $self->graph_colours->{$field->name};
+  $colour = $self->_get_palette_colour if (!defined $colour);
+
+  my $neg_field = $field->get_negative();
+  $self->graph_colours->{$neg_field->name} = $colour if (defined $neg_field);
+  $self->graph_colours->{$field->name} = $colour;
+
   my $type   = $field->metadata('draw') || 'LINE1';
   if ($type =~ /(LINE|AREA)STACK/) {
     if (!$self->stack) {
