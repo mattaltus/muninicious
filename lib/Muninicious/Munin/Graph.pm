@@ -124,7 +124,7 @@ sub _push_labels {
   my $max_label_length = $self->_get_max_label_length();
   my $colour = $field->metadata('colour') || $field->metadata('color');
 
-  $colour = $self->graph_colours->{$field->name};
+  $colour = $self->graph_colours->{$field->name} if (!defined $colour);
   $colour = $self->_get_palette_colour if (!defined $colour);
 
   my $neg_field = $field->get_negative();
