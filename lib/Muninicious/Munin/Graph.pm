@@ -118,7 +118,7 @@ sub _get_palette_colour {
 sub _push_labels {
   my ($self, $args, $field, $is_negative) = @_;
 
-  return if (defined $field->metadata('graph') && $field->metadata('graph') eq 'no' && !$is_negative);
+  return 0 if (defined $field->metadata('graph') && $field->metadata('graph') eq 'no' && !$is_negative);
 
   my $max_label_length = $self->_get_max_label_length();
   my $colour = $field->metadata('colour') || $field->metadata('color') || $self->_get_palette_colour();
@@ -144,26 +144,35 @@ sub _push_labels {
     push(@$args, 'CDEF:re_zero'.$cdef.$field->get_rrd_name.'=n'.$cdef.$field->get_rrd_name.',UN,0,0,IF');
     push(@$args, 'LINE1:re_zero'.$cdef.$field->get_rrd_name.'#000000');
   }
+  return 1;
 }
 
 sub _push_gprint {
   my ($self, $args, $field, $is_negative) = @_;
 
-  my $cdef = (defined $field->metadata('cdef')) ? 'cdef' : '';
-  if (!$is_negative) {
-    push(@$args, 'GPRINT:n'.$cdef.$field->get_rrd_name.':LAST:%6.2lf%s');
-    push(@$args, 'GPRINT:l'.$cdef.$field->get_rrd_name.':MIN:%6.2lf%s');
-    push(@$args, 'GPRINT:a'.$cdef.$field->get_rrd_name.':AVERAGE:%6.2lf%s');
-    push(@$args, 'GPRINT:h'.$cdef.$field->get_rrd_name.':MAX:%6.2lf%s\\j');
-  }
-  else {
-    push(@$args, 'GPRINT:n'.$cdef.$field->get_rrd_name.':LAST:%6.2lf%s/\\g');
-    push(@$args, 'GPRINT:l'.$cdef.$field->get_rrd_name.':MIN:%6.2lf%s/\\g');
-    push(@$args, 'GPRINT:a'.$cdef.$field->get_rrd_name.':AVERAGE:%6.2lf%s/\\g');
-    push(@$args, 'GPRINT:h'.$cdef.$field->get_rrd_name.':MAX:%6.2lf%s/\\g');
-  }
+  return if (defined $field->metadata('graph') && $field->metadata('graph') eq 'no' && !$is_negative);
 
-  return;
+  my $cdef = (defined $field->metadata('cdef')) ? 'cdef' : '';
+  my $neg_field = $field->get_negative($field);
+
+ push(@$args, 'GPRINT:n'.$cdef.$neg_field->get_rrd_name.':LAST:%6.2lf%s/\\g')
+    if ($neg_field);
+  push(@$args, 'GPRINT:n'.$cdef.$field->get_rrd_name.':LAST:%6.2lf%s');
+
+  push(@$args, 'GPRINT:l'.$cdef.$neg_field->get_rrd_name.':MIN:%6.2lf%s/\\g')
+    if ($neg_field);
+  push(@$args, 'GPRINT:l'.$cdef.$field->get_rrd_name.':MIN:%6.2lf%s');
+
+  push(@$args, 'GPRINT:a'.$cdef.$neg_field->get_rrd_name.':AVERAGE:%6.2lf%s/\\g')
+    if ($neg_field);
+  push(@$args, 'GPRINT:a'.$cdef.$field->get_rrd_name.':AVERAGE:%6.2lf%s');
+
+  push(@$args, 'GPRINT:h'.$cdef.$neg_field->get_rrd_name.':MAX:%6.2lf%s/\\g')
+    if ($neg_field);
+  push(@$args, 'GPRINT:h'.$cdef.$field->get_rrd_name.':MAX:%6.2lf%s\\j');
+
+  return ($field->name, $neg_field->name) if ($neg_field);
+  return ($field->name);
 }
 
 sub _push_cdefs {
@@ -223,28 +232,26 @@ sub get_rrd_args {
     push(@args, 'COMMENT:Max\\:  \\j');
   }
 
+  my %drawn;
+  my %gprinted;
   foreach my $field (@{$self->_get_applicable_fields}) {
     my $name = $field->name;
-    if (grep /^\Q$name\E$/, @$negatives) {
+    my $is_negative = grep {/^\Q$name\E$/} @$negatives;
+    if (!$is_negative) {
+      $drawn{$name} = $self->_push_labels(\@args, $field, 0);
+      my @printed = $self->_push_gprint(\@args, $field, 0);
+      $gprinted{$_} = 1 foreach (@printed);
     }
   }
-
   foreach my $field (@{$self->_get_applicable_fields}) {
-    my $name = $field->name;
-    my $is_negative = grep {/^\Q$name\E$/} @$negatives;
-    $self->_push_labels(\@args, $field, $is_negative)
-      if (!$is_negative);
+    $self->_push_gprint(\@args, $field, 0) if (!$gprinted{$field->name});
   }
   foreach my $field (@{$self->_get_applicable_fields}) {
     my $name = $field->name;
     my $is_negative = grep {/^\Q$name\E$/} @$negatives;
-    $self->_push_gprint(\@args, $field, $is_negative);
-  }
-  foreach my $field (@{$self->_get_applicable_fields}) {
-    my $name = $field->name;
-    my $is_negative = grep {/^\Q$name\E$/} @$negatives;
-    $self->_push_labels(\@args, $field, $is_negative)
-      if ($is_negative);
+    if (!$drawn{$name}) {
+      $drawn{$name} = $self->_push_labels(\@args, $field, $is_negative);
+     }
   }
   my $clock = localtime();
   $clock =~ s/\:/\\\:/g;
@@ -252,6 +259,8 @@ sub get_rrd_args {
 
   push(@args, '--end');
   push(@args, time());
+
+  warn Data::Dumper::Dumper(\@args);
 
   return \@args;
 }

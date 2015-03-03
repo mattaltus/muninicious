@@ -51,6 +51,15 @@ sub metadata {
   }
 }
 
+sub get_negative {
+  my ($self)  = @_;
+
+  my $neg_field_name = $self->metadata('negative');
+  return if (!defined $neg_field_name);
+
+  return $self->service->field_by_name($neg_field_name);
+}
+
 sub get_rrd_file {
   my ($self) = @_;
 
