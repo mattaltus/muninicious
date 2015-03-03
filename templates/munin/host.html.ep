@@ -9,7 +9,7 @@
   </li>
 % if (defined $host) {
   <li class='text-capitalize'>
-    <a href="<%= url_for("/page/".$group->name) %>">
+    <a href="<%= url_for("/group/".$group->name) %>">
       <%= $group->name %>
     </a>
   </li>
@@ -29,7 +29,7 @@
 <ul class="nav nav-tabs">
 % foreach my $cat (sort { lc($a) cmp lc($b) } @{$host->service_categories}) {
 % my $active = $category eq $cat ? 'active' : '';
-  <li class='text-capitalize <%= $active %>'><a href="<%= url_for("/page/".$group->name."/".$host->name."/".$cat) %>"><%= $cat %></a></li>
+  <li class='text-capitalize <%= $active %>'><a href="<%= url_for("/host/".$group->name."/".$host->name."/".$cat) %>"><%= $cat %></a></li>
 % }
 </ul>
 &nbsp;
