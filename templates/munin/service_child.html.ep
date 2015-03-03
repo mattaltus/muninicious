@@ -1,0 +1,22 @@
+% layout 'default';
+% title $group->name.' - '.$host->name.' - '.$service->metadata('title');
+
+<%= include 'munin/breadcrumbs', group => $group, host => $host, parent => undef, service => $service %>
+
+% foreach my $service (sort { $a->metadata('title') cmp $b->metadata('title') } @{$service->children}) {
+<div class="panel panel-default">
+  <div class="panel-heading text-capitalize"><%= $service->metadata('title') %></div>
+  <div class="panel-body">
+    <div class='col-md-6'>
+      <a href="<%= url_for($service->get_page_url()) %>">
+        <img class="img-rounded" src="<%= url_for($service->get_graph_url('day')) %>">
+      </a>
+    </div>
+    <div class='col-md-6'>
+      <a href="<%= url_for($service->get_page_url()) %>">
+        <img class="img-rounded" src="<%= url_for($service->get_graph_url('week')) %>">
+      </a>
+    </div>
+  </div>
+</div>
+% }
