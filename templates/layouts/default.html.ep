@@ -21,7 +21,7 @@
                   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Groups<span class="caret"></span></a>
                   <ul class="dropdown-menu" role="menu">
 % foreach my $group (@{$datafile->groups}) {
-                    <li class="text-capitalize"><a href="<%= url_for("/group/".$group->name) %>"><%= $group->name %></a></li>
+                    <li class="text-capitalize"><a href="<%= url_for($group->get_page_url) %>"><%= $group->name %></a></li>
 % }
                   </ul>
                 </li>
@@ -29,7 +29,7 @@
                   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Hosts<span class="caret"></span></a>
                   <ul class="dropdown-menu" role="menu">
 % foreach my $host (@{$datafile->hosts}) {
-                    <li class="text-uppercase"><a href="<%= url_for("/host/".$host->group->name."/".$host->name) %>"><%= $host->name %></a></li>
+                    <li class="text-uppercase"><a href="<%= url_for($host->get_page_url) %>"><%= $host->name %></a></li>
 % }
                   </ul>
                 </li>

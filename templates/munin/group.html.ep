@@ -7,14 +7,14 @@
 <div class="panel panel-default">
   <div class="panel-heading">
     <h3 class="panel-title text-uppercase">
-      <a href="<%= url_for("/host/".$group->name."/".$host->name) %>">
+      <a href="<%= url_for($host->get_page_url) %>">
         <%= $host->name %></h3>
       </a>
   </div>
   <ul class="list-group">
 %   foreach my $service (sort { lc($a->metadata('title')) cmp lc($b->metadata('title')) } @{$host->services}) {
     <li class="list-group-item text-capitalize">
-      <a href="<%= url_for("/service/".$group->name."/".$host->name."/".$service->name) %>">
+      <a href="<%= url_for($service->get_page_url) %>">
         <%= $service->metadata('title') %>
       </a>
     </li>
