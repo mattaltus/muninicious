@@ -1,0 +1,27 @@
+% layout 'default';
+% title $group->name.' - '.$host->name.' - '.$service->metadata('title');
+
+<%= include 'munin/breadcrumbs', group => $group, host => $host, service => $service %>
+
+<div class="panel panel-default">
+  <div class="panel-heading text-capitalize"><%= $service->metadata('title') %></div>
+  <div class="panel-body">
+    <div class='row'>
+      <div class='col-md-6'>
+        <img class="img-rounded" src="<%= url_for($service->get_graph_url('day')) %>">
+      </div>
+      <div class='col-md-6'>
+        <img class="img-rounded" src="<%= url_for($service->get_graph_url('week')) %>">
+      </div>
+    </div>
+    &nbsp;
+    <div class='row'>
+      <div class='col-md-6'>
+        <img class="img-rounded" src="<%= url_for($service->get_graph_url('month')) %>">
+      </div>
+      <div class='col-md-6'>
+        <img class="img-rounded" src="<%= url_for($service->get_graph_url('year')) %>">
+      </div>
+    </div>
+  </div>
+</div>

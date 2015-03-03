@@ -50,8 +50,29 @@ sub host {
   return;
 }
 
+sub service {
+  my $self = shift;
 
+  eval {
+    my $group_name   = $self->param('group')   || die 'No group specified';
+    my $host_name    = $self->param('host')    || die 'No host specified';
+    my $service_name = $self->param('service') || die 'No service specified';
 
+    my $group = $self->stash('datafile')->group_by_name($group_name);
+    $self->stash('group' => $group);
+    my $host = $group->host_by_name($host_name);
+    $self->stash('host' => $host);
+    my $service = $host->service_by_name($service_name);
+    $self->stash('service' => $service);
+
+    $self->render(template => 'munin/service');
+    return;
+  };
+  if ($@) {
+    $self->render(text => "Error: $@", status => 500);
+    return;
+  }
+}
 
 sub graph {
   my $self = shift;

@@ -15,10 +15,14 @@
   <div class="panel-heading text-capitalize"><%= $service->metadata('title') %></div>
   <div class="panel-body">
     <div class='col-md-6'>
-      <img class="img-rounded" src="<%= url_for($service->get_graph_url('day')) %>">
+      <a href="<%= url_for("/service/".$group->name."/".$host->name."/".$service->name) %>">
+        <img class="img-rounded" src="<%= url_for($service->get_graph_url('day')) %>">
+      </a>
     </div>
     <div class='col-md-6'>
-      <img class="img-rounded" src="<%= url_for($service->get_graph_url('week')) %>">
+      <a href="<%= url_for("/service/".$group->name."/".$host->name."/".$service->name) %>">
+        <img class="img-rounded" src="<%= url_for($service->get_graph_url('week')) %>">
+      </a>
     </div>
   </div>
 </div>

@@ -14,7 +14,7 @@
   <ul class="list-group">
 %   foreach my $service (sort { lc($a->metadata('title')) cmp lc($b->metadata('title')) } @{$host->services}) {
     <li class="list-group-item text-capitalize">
-      <a href="<%= url_for("/host/".$group->name."/".$host->name."/".$service->name) %>">
+      <a href="<%= url_for("/service/".$group->name."/".$host->name."/".$service->name) %>">
         <%= $service->metadata('title') %>
       </a>
     </li>

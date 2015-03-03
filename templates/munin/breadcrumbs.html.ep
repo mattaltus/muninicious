@@ -34,7 +34,7 @@
 % }
 % if (defined $service) {
   <li class='active text-capitalize'>
-    <%= $service->name %>
+    <%= $service->metadata('title') %>
   </li>
 % }
 </ol>
