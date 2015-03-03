@@ -32,6 +32,8 @@ sub _parse {
     chomp;
     next if (/^version\s/i);
     if ($_ =~ /^([^;]+);([^\:]+)\:([^\.]+)\.(.+)$/) {
+      next if ($4 =~ /^host_name\s+(.+)$/);
+
       my $group = $data->{$1};
       if (!defined $group) {
         $group = Muninicious::Munin::Group->new({'name' => $1});
@@ -83,9 +85,6 @@ sub _parse {
           $service->add_field($field);
         }
         $field->metadata($2, $3);
-      }
-      elsif ($4 =~ /^host_name\s+(.+)$/) {
-        # ignore host_lines.
       }
       else {
         warn "Unmatched line: $_";
