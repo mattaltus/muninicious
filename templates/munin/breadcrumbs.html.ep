@@ -1,0 +1,40 @@
+<ol class="breadcrumb">
+% if (defined $group) {
+  <li class='text-capitalize'>
+    <a href="<%= url_for("/") %>">
+      Home
+    </a>
+  </li>
+% } else {
+  <li class='active text-capitalize'>
+    Home
+  </li>
+% }
+% if (defined $host) {
+  <li class='text-capitalize'>
+    <a href="<%= url_for("/group/".$group->name) %>">
+      <%= $group->name %>
+    </a>
+  </li>
+% } elsif (defined $group) {
+  <li class='active text-capitalize'>
+    <%= $group->name %>
+  </li>
+% }
+% if (defined $service) {
+  <li class='text-uppercase'>
+    <a href="<%= url_for("/host/".$group->name."/".$host->name) %>">
+      <%= $host->name %>
+    </a>
+  </li>
+% } elsif (defined $host) {
+  <li class='active text-uppercase'>
+    <%= $host->name %>
+  </li>
+% }
+% if (defined $service) {
+  <li class='active text-capitalize'>
+    <%= $service->name %>
+  </li>
+% }
+</ol>

@@ -1,6 +1,8 @@
 % layout 'default';
 % title 'Home';
 
+<%= include 'munin/breadcrumbs', group => undef, host => undef, service => undef %>
+
 % foreach my $group (sort { $a->name cmp $b->name } @{$config->getDatafile->groups}) {
 <div class="panel panel-default">
   <div class="panel-heading">

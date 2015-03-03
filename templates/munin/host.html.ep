@@ -1,30 +1,7 @@
 % layout 'default';
 % title $group->name.' - '.$host->name;
 
-<ol class="breadcrumb">
-  <li class='text-capitalize'>
-    <a href="<%= url_for("/") %>">
-      Home
-    </a>
-  </li>
-% if (defined $host) {
-  <li class='text-capitalize'>
-    <a href="<%= url_for("/group/".$group->name) %>">
-      <%= $group->name %>
-    </a>
-  </li>
-% } else {
-  <li class='active text-capitalize'>
-    <%= $group->name %>
-  </li>
-% }
-  </li>
-% if (defined $host) {
-  <li class='active text-uppercase'>
-    <%= $host->name %>
-  </li>
-% }
-</ol>
+<%= include 'munin/breadcrumbs', group => $group, host => $host, service => undef %>
 
 <ul class="nav nav-tabs">
 % foreach my $cat (sort { lc($a) cmp lc($b) } @{$host->service_categories}) {
