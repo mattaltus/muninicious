@@ -278,7 +278,7 @@ sub get_png_data {
   my $rrd_args = $self->get_rrd_args('PNG');
 
   my $command = 'rrdtool graph '.join(' ', map {"'".$_."'"} @$rrd_args);
-  open(my $rrd, '-|', $command) || die 'Error rrdtool graph: $!';
+  open(my $rrd, '-|', $command) || die "Error rrdtool graph: $!";
   binmode($rrd);
   my $data;
   my $buffer;
@@ -296,7 +296,7 @@ sub get_svg_data {
   my $rrd_args = $self->get_rrd_args('SVG');
 
   my $command = 'rrdtool graph '.join(' ', map {"'".$_."'"} @$rrd_args);
-  open(my $rrd, '-|', $command) || die 'Error rrdtool graph: $!';
+  open(my $rrd, '-|', $command) || die "Error rrdtool graph: $!";
   binmode($rrd);
   my $data;
   my $buffer;
