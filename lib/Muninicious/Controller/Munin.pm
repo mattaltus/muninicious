@@ -1,9 +1,17 @@
 package Muninicious::Controller::Munin  ;
 use Mojo::Base 'Mojolicious::Controller';
 
+
+sub _init {
+  my $self = shift;
+  $self->stash('config')->reload();
+  $self->stash('datafile' => $self->stash('config')->getDatafile());
+}
+
 # This action will render a template
 sub home {
   my $self = shift;
+  $self->_init;
 
   $self->render(template => 'munin/home');
 }
@@ -11,6 +19,7 @@ sub home {
 
 sub group {
   my $self = shift;
+  $self->_init;
 
   my $group_name = $self->param('group');
 
@@ -23,6 +32,7 @@ sub group {
 
 sub host {
   my $self = shift;
+  $self->_init;
 
   my $group_name = $self->param('group') || '*';
   my $host_name  = $self->param('host')  || '*';
@@ -52,6 +62,7 @@ sub host {
 
 sub service {
   my $self = shift;
+  $self->_init;
 
   eval {
     my $group_name   = $self->param('group')   || die 'No group specified';
@@ -87,6 +98,7 @@ sub service {
 
 sub service_child {
   my $self = shift;
+  $self->_init;
 
   eval {
     my $group_name   = $self->param('group')   || die 'No group specified';
@@ -111,6 +123,7 @@ sub service_child {
 
 sub graph {
   my $self = shift;
+  $self->_init;
 
   eval {
     my $group_name   = $self->param('group')   || die 'No group specified';

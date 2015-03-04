@@ -10,12 +10,6 @@ sub startup {
   my $config = Muninicious::Munin::Config->new('/etc/munin/munin.conf');
   $self->defaults('config' => $config);
 
-  $self->hook(before_dispatch => sub {
-    my $c = shift;
-    $c->stash('config')->reload();
-    $c->stash('datafile' => $c->stash('config')->getDatafile());
-  });
-
   # Router
   my $r = $self->routes;
 
