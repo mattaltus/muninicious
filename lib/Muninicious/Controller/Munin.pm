@@ -153,6 +153,36 @@ sub graph {
   }
 }
 
+sub data {
+  my $self = shift;
+  $self->_init;
+
+  eval {
+    my $group_name   = $self->param('group')   || die 'No group specified';
+    my $host_name    = $self->param('host')    || die 'No host specified';
+    my $service_name = $self->param('service') || die 'No service specified';
+    my $child_name   = $self->param('child');
+
+    my $group   = $self->stash('datafile')->group_by_name($group_name) || die "Group $group_name not found";
+    my $host    = $group->host_by_name($host_name) || die "Host $host_name not found";
+    my $service = $host->service_by_name($service_name) || die "Service $service_name not found";
+    if (defined $child_name) {
+      $service = $service->child_by_name($child_name) || die "Service $child_name not found";
+    }
+
+    my $data = $service->get_data() || die "Could not generate graph";
+
+    my $json = $data->get_data() || die "Failed to retrieve png data";
+
+    $self->render(json => $json);
+
+    return;
+  };
+  if ($@) {
+    $self->render(text => "Error: $@", status => 500);
+    return;
+  }
+}
 
 
 1;

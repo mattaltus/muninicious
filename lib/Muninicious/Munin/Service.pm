@@ -4,6 +4,7 @@ use strict;
 use warnings;
 
 use Muninicious::Munin::RRD::Graph;
+use Muninicious::Munin::RRD::Data;
 
 sub new {
   my ($class, $args) = @_;
@@ -156,5 +157,10 @@ sub get_graph {
   return Muninicious::Munin::RRD::Graph->new(service => $self, type => $type);
 }
 
+sub get_data {
+  my ($self) = @_;
+
+  return Muninicious::Munin::RRD::Data->new(service => $self);
+}
 
 1;

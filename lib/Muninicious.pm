@@ -26,6 +26,9 @@ sub startup {
 
   $r->get('graph/:group/#host/:service/:type')->to(controller => 'munin', action => 'graph', type => 'day');
   $r->get('graph/:group/#host/:service/:child/:type')->to(controller => 'munin', action => 'graph', type => 'day');
+
+  $r->get('data/:group/#host/:service')->to(controller => 'munin', action => 'data');
+  $r->get('data/:group/#host/:service/:child')->to(controller => 'munin', action => 'data');
 }
 
 
