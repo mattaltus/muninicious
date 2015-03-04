@@ -3,6 +3,8 @@ package Muninicious::Munin::RRD::Graph;
 use strict;
 use warnings;
 
+use Muninicious::Munin::RRD::Colours;
+
 use Mojo::Base -base;
 
 
@@ -34,21 +36,14 @@ use constant {
     'axis'   => 'CFD6F8',
     'arrow'  => 'CFD6F8'
   },
-  PALETTE => [qw(
-    00CC00 0066B3 FF8000 FFCC00 330099 990099 CCFF00 FF0000 808080
-    008F00 00487D B35A00 B38F00         6B006B 8FB300 B30000 BEBEBE
-    80FF80 80C9FF FFC080 FFE680 AA80FF EE00CC FF8080
-    666600 FFBFFF 00FFCC CC6699 999900
-  )],
 };
 
-has service       => undef;
-has type          => 'day';
-has name          => undef;
-has filename      => '-';
-has palette_index => 0;
-has stack         => 0;
-has graph_colours => sub { return {} };
+has service  => undef;
+has type     => 'day';
+has name     => undef;
+has filename => '-';
+has stack    => 0;
+has colours  => sub { Muninicious::Munin::RRD::Colours->new() };
 
 
 sub _get_applicable_fields {
@@ -103,33 +98,13 @@ sub _get_max_label_length {
   return $max_label_length + 1;
 }
 
-sub _get_palette_colour {
-  my ($self) = @_;
-
-  my $index = $self->palette_index();
-  $index = 0 if ($index >= scalar @{&PALETTE});
-
-  my $colour = &PALETTE->[$index++];
-
-  $self->palette_index($index);
-
-  return $colour;
-}
-
 sub _push_labels {
   my ($self, $args, $field, $is_negative) = @_;
 
   return 0 if (defined $field->metadata('graph') && $field->metadata('graph') eq 'no' && !$is_negative);
 
   my $max_label_length = $self->_get_max_label_length();
-  my $colour = $field->metadata('colour') || $field->metadata('color');
-
-  $colour = $self->graph_colours->{$field->name} if (!defined $colour);
-  $colour = $self->_get_palette_colour if (!defined $colour);
-
-  my $neg_field = $field->get_negative();
-  $self->graph_colours->{$neg_field->name} = $colour if (defined $neg_field);
-  $self->graph_colours->{$field->name} = $colour;
+  my $colour = $self->colours->get_field_colour($field);
 
   my $type   = $field->metadata('draw') || 'LINE1';
   if ($type =~ /(LINE|AREA)STACK/) {
