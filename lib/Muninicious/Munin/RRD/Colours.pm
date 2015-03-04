@@ -36,9 +36,10 @@ sub get_field_colour {
   my $colour = $field->metadata('colour') || $field->metadata('color');
 
   $colour = $self->graph_colours->{$field->name} if (!defined $colour);
+  my $neg_field = $field->get_negative();
+  $colour = $self->graph_colours->{$neg_field->name} if (!defined $colour && defined $neg_field);
   $colour = $self->get_next_colour if (!defined $colour);
 
-  my $neg_field = $field->get_negative();
   $self->graph_colours->{$neg_field->name} = $colour if (defined $neg_field);
   $self->graph_colours->{$field->name} = $colour;
 
