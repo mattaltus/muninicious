@@ -199,7 +199,7 @@ sub _push_cdefs {
 
 
 sub get_rrd_args {
-  my ($self) = @_;
+  my ($self, $format) = @_;
 
   my $negatives = $self->_get_negative_names();
 
@@ -212,7 +212,7 @@ sub get_rrd_args {
   push(@args, '--slope-mode');
   push(@args, '--height', 175);
   push(@args, '--width', 400);
-  push(@args, '--imgformat', 'PNG');
+  push(@args, '--imgformat', $format);
   push(@args, '--font', 'DEFAULT:0:'.join(',', @{&FONTS}));
   push(@args, '--font', 'LEGEND:7:'.join(',', @{&FIXED_FONTS}));
   foreach my $key (keys %{&COLOURS}) {
@@ -275,7 +275,25 @@ sub get_rrd_args {
 sub get_png_data {
   my ($self) = @_;
 
-  my $rrd_args = $self->get_rrd_args();
+  my $rrd_args = $self->get_rrd_args('PNG');
+
+  my $command = 'rrdtool graph '.join(' ', map {"'".$_."'"} @$rrd_args);
+  open(my $rrd, '-|', $command) || die 'Error rrdtool graph: $!';
+  binmode($rrd);
+  my $data;
+  my $buffer;
+  while(read($rrd, $buffer, 1024) > 0){
+    $data .= $buffer;
+  }
+  close($rrd);
+
+  return $data;
+}
+
+sub get_svg_data {
+  my ($self) = @_;
+
+  my $rrd_args = $self->get_rrd_args('SVG');
 
   my $command = 'rrdtool graph '.join(' ', map {"'".$_."'"} @$rrd_args);
   open(my $rrd, '-|', $command) || die 'Error rrdtool graph: $!';
