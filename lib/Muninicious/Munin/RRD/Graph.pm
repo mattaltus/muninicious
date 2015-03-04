@@ -1,4 +1,4 @@
-package Muninicious::Munin::Graph;
+package Muninicious::Munin::RRD::Graph;
 
 use strict;
 use warnings;

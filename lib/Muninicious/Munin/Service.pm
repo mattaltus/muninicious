@@ -3,7 +3,7 @@ package Muninicious::Munin::Service;
 use strict;
 use warnings;
 
-use Muninicious::Munin::Graph;
+use Muninicious::Munin::RRD::Graph;
 
 sub new {
   my ($class, $args) = @_;
@@ -153,7 +153,7 @@ sub get_page_url {
 sub get_graph {
   my ($self, $type) = @_;
 
-  return Muninicious::Munin::Graph->new(service => $self, type => $type);
+  return Muninicious::Munin::RRD::Graph->new(service => $self, type => $type);
 }
 
 
