@@ -139,6 +139,18 @@ sub get_graph_url {
   return '/graph/'.$self->host->group->name.'/'.$self->host->name.'/'.$self->name.'/'.$type;
 }
 
+sub get_data_url {
+  my ($self, $type) = @_;
+
+  my $type_str = '';
+  $type_str = '?type='.$type if (defined $type);
+
+  if ($self->parent) {
+    return '/data/'.$self->host->group->name.'/'.$self->host->name.'/'.$self->parent->name.'/'.$self->name.$type_str;
+  }
+  return '/data/'.$self->host->group->name.'/'.$self->host->name.'/'.$self->name.$type_str;
+}
+
 sub get_page_url {
   my ($self) = @_;
 
