@@ -161,6 +161,7 @@ sub data {
     my $group_name   = $self->param('group')   || die 'No group specified';
     my $host_name    = $self->param('host')    || die 'No host specified';
     my $service_name = $self->param('service') || die 'No service specified';
+    my $type         = $self->param('type')    || 'all';
     my $child_name   = $self->param('child');
 
     my $group   = $self->stash('datafile')->group_by_name($group_name) || die "Group $group_name not found";
@@ -172,7 +173,7 @@ sub data {
 
     my $data = $service->get_data() || die "Could not generate graph";
 
-    my $json = $data->get_data() || die "Failed to retrieve png data";
+    my $json = $data->get_data($type) || die "Failed to retrieve png data";
 
     $self->render(json => $json);
 

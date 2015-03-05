@@ -10,7 +10,8 @@ use Muninicious::Munin::RRD::Colours;
 use Math::BigFloat;
 
 use constant {
-  RRD_STARTS => ['-2d', '-9d', '-6w', '-15mon']
+  RRD_STARTS => {day => '-2d', week => '-9d', month => '-6w', year => '-15mon'},
+  RRD_ORDER  => ['day', 'week', 'month', 'year'],
 };
 
 has service => undef;
@@ -44,9 +45,9 @@ sub apply_cdef {
 }
 
 sub get_field_data {
-  my ($self, $field, $type, $start) = @_;
+  my ($self, $field, $agg, $start) = @_;
 
-  my $command = "rrdtool fetch '".$field->get_rrd_file."' '$type' -s '$start'";
+  my $command = "rrdtool fetch '".$field->get_rrd_file."' '$agg' -s '$start'";
   open(my $rrd, '-|', $command) || die "Error rrdtool fetch: $!";
   my %data;
   while (<$rrd>) {
@@ -60,11 +61,12 @@ sub get_field_data {
 }
 
 sub extract_data {
-  my ($self, $field, $type) = @_;
+  my ($self, $field, $type, $agg) = @_;
 
   my $data;
-  foreach my $start (@{&RRD_STARTS}) {
-    my $field_data = $self->get_field_data($field, $type, $start);
+  foreach my $start (@{&RRD_ORDER}) {
+    next if ($type ne 'all' && $type ne $start);
+    my $field_data = $self->get_field_data($field, $agg, &RRD_STARTS->{$start});
     if (!defined $data) {
       $data = $field_data;
     }
@@ -81,7 +83,7 @@ sub extract_data {
 
 
 sub get_data {
-  my ($self) = @_;
+  my ($self, $type) = @_;
 
   my $data = {
     'name'   => $self->service->name,
@@ -91,9 +93,9 @@ sub get_data {
   };
 
   foreach my $field (@{$self->service->fields}) {
-    my $average = $self->extract_data($field, 'AVERAGE');
-    my $min     = $self->extract_data($field, 'MIN');
-    my $max     = $self->extract_data($field, 'MAX');
+    my $average = $self->extract_data($field, $type, 'AVERAGE');
+    my $min     = $self->extract_data($field, $type, 'MIN');
+    my $max     = $self->extract_data($field, $type, 'MAX');
 
     my $field_data;
     $field_data->{'name'}   = $field->name;
