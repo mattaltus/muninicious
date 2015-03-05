@@ -3,8 +3,9 @@
   <head>
      <title>Muninicious - <%= title %></title>
      <link rel="stylesheet" href="<%= url_for("/css/bootstrap.min.css") %>" />
-     <script src="<%= url_for("/js/jquery.min.js") %>"></script>
+     <script language="javascript" src="<%= url_for("/js/jquery.min.js") %>"></script>
      <script language="javascript" src="<%= url_for("/js/bootstrap.min.js") %>"></script>
+     <script language="javascript" src="<%= url_for("/js/dygraph-combined.js") %>"></script>
   </head>
   <body>
 

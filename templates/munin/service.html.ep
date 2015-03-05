@@ -3,8 +3,19 @@
 
 <%= include 'munin/breadcrumbs', group => $group, host => $host, parent => $parent, service => $service %>
 
+<%= include 'munin/zoom_modal'%>
+
 <div class="panel panel-default">
-  <div class="panel-heading text-capitalize"><%= $service->metadata('title') %></div>
+  <div class="panel-heading text-capitalize">
+    <div class='row'>
+      <div class='col-md-11'>
+        <%= $service->metadata('title') %>
+      </div>
+      <div class='col-md-1 text-right'>
+        <%= include 'munin/zoom_button', service => $service %>
+      </div>
+    </div>
+  </div>
   <div class="panel-body">
     <div class='row'>
       <div class='col-md-6'>

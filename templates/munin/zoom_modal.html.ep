@@ -1,0 +1,62 @@
+<div class="modal fade" id="graph_zoom">
+  <div class="modal-dialog modal-lg" style="width: 95%">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title text-capitalize" id="graph_zoom_title">Graph - None</h4>
+      </div>
+      <div class="modal-body">
+        <div id="graph" style="width: 100%; height: 500px"></div>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<script>
+$('#graph_zoom').on('shown.bs.modal', function (event) {
+  var button = $(event.relatedTarget);
+  var url = button.data('dataurl');
+  var title = button.data('title');
+
+  // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+  // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+  var modal = $(this);
+  var graph = modal.find('#graph');
+  modal.find('.modal-title').text(title);
+
+  $.getJSON(url, function(data) {
+    var y_axis  = data.vlabel;
+    var colours = new Array();
+    var gdata   = new Array();
+    var labels  = ['ts'];
+    $.each( data.data, function( i, series ) {
+      colours.push('#'+series.colour);
+      labels.push(series.name);
+      $.each( series.data, function(i, row) {
+        if (typeof gdata[i] === 'undefined') {
+          gdata[i] = new Array();
+          gdata[i].push(new Date(row[0] * 1000));
+          gdata[i].push(row[1][1]);
+        }
+        else {
+          gdata[i].push(row[1][1]);
+        }
+      });
+    });
+
+    g = new Dygraph(document.getElementById("graph"),
+      gdata,
+      {
+        showRangeSelector: true,
+        rangeSelectorHeight: 30,
+        colors: colours,
+        labels: labels,
+        ylabel: y_axis,
+        labelsKMB: true,
+        rollPeriod: 15,
+      }
+    );
+  });
+});
+
+</script>

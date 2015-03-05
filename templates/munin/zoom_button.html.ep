@@ -1,0 +1,4 @@
+% my $title = ($service->parent() ? $service->parent->metadata('title').' - ' : '').$service->metadata('title');
+<a href='#' data-toggle="modal" data-target="#graph_zoom" data-title="<%= $title %>" data-dataurl="<%= $service->get_data_url() %>">
+  <span class="glyphicon glyphicon-zoom-in"></span>
+</a>
