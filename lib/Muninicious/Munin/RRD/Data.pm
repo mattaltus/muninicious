@@ -7,6 +7,8 @@ use Mojo::Base -base;
 
 use Muninicious::Munin::RRD::Colours;
 
+use Math::BigFloat;
+
 use constant {
   RRD_STARTS => ['-2d', '-9d', '-6w', '-15mon']
 };
@@ -18,18 +20,27 @@ sub parse_value {
   my ($value) = @_;
 
   if ($value eq '-nan') {
-    return;
+    return Math::BigFloat->bnan();
   }
-  elsif ($value =~ /(\d\.\d+)e([\-\+])(\d+)/) {
-    if ($2 eq '-') {
-      return $1 / (10 ^ $3);
-    }
-    else {
-      return $1 * (10 ^ $3);
-    }
-  }
+  return eval "return $value;";
   return $value;
+}
 
+sub apply_cdef {
+  my ($field, $value) = @_;
+
+  return if (!defined $value);
+
+  return $value if ($value->isa('Math::BigFloat') && $value->is_nan());
+
+  my $cdef = $field->metadata('cdef');
+
+  return $value if (!defined $cdef);
+
+  my ($f, $num, $op) = split(/,/, $cdef);
+
+  return eval "return $value $op $num;";
+  return $value;
 }
 
 sub get_field_data {
@@ -40,7 +51,7 @@ sub get_field_data {
   my %data;
   while (<$rrd>) {
     if ($_ =~ /^(\d+)\:\s+(.*)$/) {
-      $data{$1} = parse_value($2);
+      $data{$1} = apply_cdef($field, parse_value($2));
     }
   }
   close($rrd);
