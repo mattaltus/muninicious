@@ -17,6 +17,16 @@ use constant {
 has service => undef;
 has colours => sub { Muninicious::Munin::RRD::Colours->new() };
 
+sub is_negative {
+  my ($self, $check_field) = @_;
+  my @list = ();
+  foreach my $field (@{$self->service->fields}) {
+    my $neg_name = $field->metadata('negative');
+    return 1 if (defined $neg_name && $neg_name eq $check_field->name);
+  }
+  return 0;
+}
+
 sub parse_value {
   my ($value) = @_;
 
@@ -44,6 +54,15 @@ sub apply_cdef {
   return $value;
 }
 
+sub apply_negative {
+  my ($self, $field, $value) = @_;
+
+  if ($self->is_negative($field)) {
+    return $value * -1;
+  }
+  return $value;
+}
+
 sub get_field_data {
   my ($self, $field, $agg, $start) = @_;
 
@@ -52,7 +71,7 @@ sub get_field_data {
   my %data;
   while (<$rrd>) {
     if ($_ =~ /^(\d+)\:\s+(.*)$/) {
-      $data{$1} = apply_cdef($field, parse_value($2));
+      $data{$1} = $self->apply_negative($field, apply_cdef($field, parse_value($2)));
     }
   }
   close($rrd);
