@@ -6,10 +6,12 @@ Should be complete enough to display all the pages and graphs that the standard 
 
 This only works with the 2.0.X series of Munin, not the SQL based 2.1.X series.
 
+[DyGraphs](http://dygraphs.com/) is used for the graph zooming features.
+
 ## Deploying
 You should be able to deploy this as you would any other Mojolicous app.  See the [Mojolicious Cookbook](http://mojolicio.us/perldoc/Mojolicious/Guides/Cookbook) for details.
 
-You may need to set the *MUNIN_DB_DIR* environment variable so Mininicious can read your Munin data.  The default location seems to be '/var/lib/munin'.  It should read this automatically out of '/etc/munin/munin.conf', but it hasn't been extensively tested.
+You may need to set the *MUNIN_DB_DIR* environment variable so Mininicious can read your Munin data.  The default location seems to be '/var/lib/munin'.
 
 The following works for me with Apache and mod_perl:
 ```
@@ -30,7 +32,6 @@ The following works for me with Apache and mod_perl:
 **Note:** This is still a work in progress and probably has bugs.
 
 ## TODO
-* Graph zooming.
 * Limits file parsing.
 * Add limits/warnings/critical to service pages.
 * Add bootstrap badges to indicate warnings/critical services.
