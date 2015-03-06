@@ -15,41 +15,65 @@ use constant {
   RRD_ORDER  => ['day', 'week', 'month', 'year'],
 };
 
-has service => undef;
-has colours => sub { Muninicious::Munin::RRD::Colours->new() };
+has service     => undef;
+has colours     => sub { Muninicious::Munin::RRD::Colours->new() };
+has negatives   => undef;
+has cdef_op     => undef;
+has cdef_factor => undef;
 
 sub is_negative {
-  my ($self, $check_field) = @_;
-  my @list = ();
-  foreach my $field (@{$self->service->fields}) {
-    my $neg_name = $field->metadata('negative');
-    return 1 if (defined $neg_name && $neg_name eq $check_field->name);
+  my ($self, $field) = @_;
+
+  if (!defined $self->negatives) {
+    $self->negatives({});
+    foreach my $field (@{$self->service->fields}) {
+      my $neg_name = $field->metadata('negative');
+      $self->negatives->{$neg_name} = 1 if (defined $neg_name);
+    }
   }
-  return 0;
+
+  return $self->negatives->{$field->name} ? 1 : 0;
 }
 
-sub parse_value {
-  my ($value) = @_;
+sub populate_cdef_lookups {
+  my ($self) = @_;
 
-  if ($value eq '-nan') {
-    return Math::BigFloat->bnan();
+  return if (defined $self->cdef_op);
+
+  $self->cdef_op({});
+  $self->cdef_factor({});
+
+  foreach my $field (@{$self->service->fields}) {
+    my $cdef = $field->metadata('cdef');
+
+    next if (!defined $cdef);
+
+    if ($cdef =~ /.*,([\d\.]+),([\/\*])/) {
+      $self->cdef_op->{$field->name} = $2;
+      $self->cdef_factor->{$field->name} = $1;
+    }
   }
-  return eval "return $value;";
-  return $value;
 }
 
 sub apply_cdef {
-  my ($field, $value) = @_;
+  my ($self, $field, $value) = @_;
 
   return Math::BigFloat->bnan() if (!defined $value);
 
-  my $cdef = $field->metadata('cdef');
+  $self->populate_cdef_lookups();
 
-  return $value if (!defined $cdef);
+  my $op  = $self->cdef_op->{$field->name};
+  return $value if (!defined $op);
 
-  my ($f, $num, $op) = split(/,/, $cdef);
+  my $factor = $self->cdef_factor->{$field->name};
 
-  return eval "return $value $op $num;";
+  if ($op eq '/') {
+    return $value / $factor;
+  }
+  elsif ($op eq '*') {
+    return $value * $factor;
+  }
+
   return $value;
 }
 
@@ -69,13 +93,14 @@ sub get_field_data {
   my %data;
   foreach my $i (0...@$fdata) {
     my $clock = $start_clock + ($steps * $i);
-    my $value = $self->apply_negative($field, apply_cdef($field, $fdata->[$i]->[0]));
+    my $value = $fdata->[$i]->[0];
+    $value = $self->apply_negative($field, $value);
+    $value = $self->apply_cdef($field, $value);
     $data{$clock} = $value;
   }
 
   return \%data;
 }
-
 
 sub extract_data {
   my ($self, $field, $type, $agg) = @_;
@@ -91,8 +116,6 @@ sub extract_data {
 
   return \%data;
 }
-
-
 
 sub get_data {
   my ($self, $type) = @_;
