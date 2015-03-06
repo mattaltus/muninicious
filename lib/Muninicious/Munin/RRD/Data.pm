@@ -5,6 +5,8 @@ use warnings;
 
 use Mojo::Base -base;
 
+use Mojo::JSON qw/true false/;
+
 use Muninicious::Munin::RRD::Colours;
 
 use Math::BigFloat;
@@ -140,6 +142,8 @@ sub get_data {
     $field_data->{'label'}  = $field->metadata('label');
     $field_data->{'info'}   = $field->metadata('info');
     $field_data->{'colour'} = $self->colours->get_field_colour($field);
+    $field_data->{'area'}   = ($field->metadata('draw') || '') =~ /AREA/ ? true : false;
+    $field_data->{'stack'}  = ($field->metadata('draw') || '') =~ /STACK/ ? true : false;
     $field_data->{'data'}   = [];
     foreach my $clock (sort keys %{$values{'MIN'}}) {
       next if ($clock > $now);
