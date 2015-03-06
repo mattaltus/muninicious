@@ -7,6 +7,7 @@ use Muninicious::Munin::RRD::Colours;
 
 use Mojo::Base -base;
 
+use RRDs;
 
 use constant {
   START => {
@@ -252,17 +253,9 @@ sub get_png_data {
 
   my $rrd_args = $self->get_rrd_args('PNG');
 
-  my $command = 'rrdtool graph '.join(' ', map {"'".$_."'"} @$rrd_args);
-  open(my $rrd, '-|', $command) || die "Error rrdtool graph: $!";
-  binmode($rrd);
-  my $data;
-  my $buffer;
-  while(read($rrd, $buffer, 1024) > 0){
-    $data .= $buffer;
-  }
-  close($rrd);
+  my $data = RRDs::graphv(@$rrd_args);
 
-  return $data;
+  return $data->{'image'};
 }
 
 sub get_svg_data {
@@ -270,17 +263,9 @@ sub get_svg_data {
 
   my $rrd_args = $self->get_rrd_args('SVG');
 
-  my $command = 'rrdtool graph '.join(' ', map {"'".$_."'"} @$rrd_args);
-  open(my $rrd, '-|', $command) || die "Error rrdtool graph: $!";
-  binmode($rrd);
-  my $data;
-  my $buffer;
-  while(read($rrd, $buffer, 1024) > 0){
-    $data .= $buffer;
-  }
-  close($rrd);
+  my $data = RRDs::graphv(@$rrd_args);
 
-  return $data;
+  return $data->{'image'};
 }
 
 1;
