@@ -3,9 +3,20 @@
 
 <%= include 'munin/breadcrumbs', group => $group, host => $host, parent => undef, service => $service %>
 
+<%= include 'munin/zoom_modal'%>
+
 % foreach my $service (sort { $a->metadata('title') cmp $b->metadata('title') } @{$service->children}) {
 <div class="panel panel-default">
-  <div class="panel-heading text-capitalize"><%= $service->metadata('title') %></div>
+  <div class="panel-heading text-capitalize">
+    <div class='row'>
+      <div class='col-md-11'>
+        <%= $service->metadata('title') %>
+      </div>
+      <div class='col-md-1 text-right'>
+        <%= include 'munin/zoom_button', service => $service %>
+      </div>
+    </div>
+  </div>
   <div class="panel-body">
     <div class='col-md-6'>
       <a href="<%= url_for($service->get_page_url()) %>">
