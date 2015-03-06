@@ -94,8 +94,8 @@ sub get_field_data {
   foreach my $i (0...@$fdata) {
     my $clock = $start_clock + ($steps * $i);
     my $value = $fdata->[$i]->[0];
-    $value = $self->apply_negative($field, $value);
     $value = $self->apply_cdef($field, $value);
+    $value = $self->apply_negative($field, $value);
     $data{$clock} = $value;
   }
 
@@ -127,6 +127,8 @@ sub get_data {
     'data'   => [],
   };
 
+  my $now = time();
+
   foreach my $field (@{$self->service->fields}) {
     my %values;
     foreach my $agg (qw/AVERAGE MIN MAX/) {
@@ -140,6 +142,7 @@ sub get_data {
     $field_data->{'colour'} = $self->colours->get_field_colour($field);
     $field_data->{'data'}   = [];
     foreach my $clock (sort keys %{$values{'MIN'}}) {
+      next if ($clock > $now);
       push(@{$field_data->{'data'}}, [$clock, [$values{'MIN'}->{$clock}, $values{'AVERAGE'}->{$clock}, $values{'AVERAGE'}->{$clock}]]);
     }
     push(@{$data->{'data'}}, $field_data);
