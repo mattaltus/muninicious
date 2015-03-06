@@ -8,6 +8,7 @@ use Mojo::Base -base;
 use Muninicious::Munin::RRD::Colours;
 
 use Math::BigFloat;
+use RRDs;
 
 use constant {
   RRD_STARTS => {day => '-2d', week => '-9d', month => '-6w', year => '-15mon'},
@@ -40,9 +41,7 @@ sub parse_value {
 sub apply_cdef {
   my ($field, $value) = @_;
 
-  return if (!defined $value);
-
-  return $value if ($value->isa('Math::BigFloat') && $value->is_nan());
+  return Math::BigFloat->bnan() if (!defined $value);
 
   my $cdef = $field->metadata('cdef');
 
@@ -66,37 +65,31 @@ sub apply_negative {
 sub get_field_data {
   my ($self, $field, $agg, $start) = @_;
 
-  my $command = "rrdtool fetch '".$field->get_rrd_file."' '$agg' -s '$start'";
-  open(my $rrd, '-|', $command) || die "Error rrdtool fetch: $!";
+  my ($start_clock, $steps, $name, $fdata) = RRDs::fetch($field->get_rrd_file, $agg, '-s', $start);
   my %data;
-  while (<$rrd>) {
-    if ($_ =~ /^(\d+)\:\s+(.*)$/) {
-      $data{$1} = $self->apply_negative($field, apply_cdef($field, parse_value($2)));
-    }
+  foreach my $i (0...@$fdata) {
+    my $clock = $start_clock + ($steps * $i);
+    my $value = $self->apply_negative($field, apply_cdef($field, $fdata->[$i]->[0]));
+    $data{$clock} = $value;
   }
-  close($rrd);
 
   return \%data;
 }
 
+
 sub extract_data {
   my ($self, $field, $type, $agg) = @_;
 
-  my $data;
-  foreach my $start (@{&RRD_ORDER}) {
+  my %data;
+  foreach my $start (reverse @{&RRD_ORDER}) {
     next if ($type ne 'all' && $type ne $start);
     my $field_data = $self->get_field_data($field, $agg, &RRD_STARTS->{$start});
-    if (!defined $data) {
-      $data = $field_data;
-    }
-    else {
-      foreach my $clock (keys %$field_data) {
-        $data->{$clock} = $field_data->{$clock};
-      }
+    foreach my $clock (keys %$field_data) {
+      $data{$clock} = $field_data->{$clock};
     }
   }
 
-  return $data;
+  return \%data;
 }
 
 
@@ -112,9 +105,10 @@ sub get_data {
   };
 
   foreach my $field (@{$self->service->fields}) {
-    my $average = $self->extract_data($field, $type, 'AVERAGE');
-    my $min     = $self->extract_data($field, $type, 'MIN');
-    my $max     = $self->extract_data($field, $type, 'MAX');
+    my %values;
+    foreach my $agg (qw/AVERAGE MIN MAX/) {
+      $values{$agg} = $self->extract_data($field, $type, $agg);
+    }
 
     my $field_data;
     $field_data->{'name'}   = $field->name;
@@ -122,12 +116,12 @@ sub get_data {
     $field_data->{'info'}   = $field->metadata('info');
     $field_data->{'colour'} = $self->colours->get_field_colour($field);
     $field_data->{'data'}   = [];
-    foreach my $clock (sort keys %$average) {
-      push(@{$field_data->{'data'}}, [$clock, [$min->{$clock}, $average->{$clock}, $max->{$clock}]]);
+    foreach my $clock (sort keys %{$values{'MIN'}}) {
+      push(@{$field_data->{'data'}}, [$clock, [$values{'MIN'}->{$clock}, $values{'AVERAGE'}->{$clock}, $values{'AVERAGE'}->{$clock}]]);
     }
-
     push(@{$data->{'data'}}, $field_data);
   }
+
   return $data;
 }
 
