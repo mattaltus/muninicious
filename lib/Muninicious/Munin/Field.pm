@@ -3,51 +3,29 @@ package Muninicious::Munin::Field;
 use strict;
 use warnings;
 
+use Mojo::Base -base;
+
 use File::Spec::Functions qw/catfile/;
 
-sub new {
-  my ($class, $args) = @_;
-
-  my $self = bless({}, $class);
-  $self->{'metadata'} = {};
-  $self->name($args->{'name'});
-  $self->service($args->{'service'});
-  $self->metadata($args->{'metadata'});
-  $self->dbdir($args->{'dbdir'});
-
-  return $self;
-}
-
-sub name {
-  my ($self, $name) = @_;
-  $self->{'name'} = $name if (defined $name);
-  return $self->{'name'};
-}
-
-sub dbdir {
-  my ($self, $dbdir) = @_;
-  $self->{'dbdir'} = $dbdir if (defined $dbdir);
-  return $self->{'dbdir'};
-}
-
-sub service {
-  my ($self, $service) = @_;
-  $self->{'service'} = $service if (defined $service);
-  return $self->{'service'};
-}
+has name      => undef;
+has service   => undef;
+has _metadata => sub { return {} };
+has dbdir     => undef;
 
 sub metadata {
   my ($self, $attr, $value) = @_;
 
+  my $md = $self->_metadata;
+
   if (!defined $attr && !defined $value) {
-    return $self->{'metadata'};
+    return $md;
   }
   elsif (!defined $value) {
-    return $self->{'metadata'}->{$attr};
+    return $md->{$attr};
   }
   else {
-    $self->{'metadata'}->{$attr} = $value;
-    return $self->{'metadata'}->{$attr};
+    $md->{$attr} = $value;
+    return $md->{$attr};
   }
 }
 
