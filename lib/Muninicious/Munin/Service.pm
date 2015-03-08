@@ -3,58 +3,26 @@ package Muninicious::Munin::Service;
 use strict;
 use warnings;
 
+use Mojo::Base -base;
+
 use Muninicious::Munin::RRD::Graph;
 use Muninicious::Munin::RRD::Data;
 
-sub new {
-  my ($class, $args) = @_;
-
-  my $self = bless({}, $class);
-  $self->{'metadata'} = {};
-  $self->{'fields'}   = [];
-  $self->{'children'} = [];
-  $self->name($args->{'name'});
-  $self->host($args->{'host'});
-  $self->metadata($args->{'metadata'});
-  $self->fields($args->{'fields'});
-  $self->children($args->{'children'});
-  $self->parent($args->{'parent'});
-
-  return $self;
-}
-
-sub name {
-  my ($self, $name) = @_;
-  $self->{'name'} = $name if (defined $name);
-  return $self->{'name'};
-}
-
-sub host {
-  my ($self, $host) = @_;
-  $self->{'host'} = $host if (defined $host);
-  return $self->{'host'};
-}
-
-sub children {
-  my ($self, $children) = @_;
-  $self->{'children'} = $children if (defined $children);
-  return $self->{'children'};
-}
-
-sub parent {
-  my ($self, $parent) = @_;
-  $self->{'parent'} = $parent if (defined $parent);
-  return $self->{'parent'};
-}
+has name      => undef;
+has host      => undef;
+has _metadata => sub { return {} };
+has _fields   => sub { return [] };
+has children  => sub { return [] };
+has parent    => undef;
 
 sub fields {
   my ($self, $fields) = @_;
-  $self->{'fields'} = $fields if (defined $fields);
+  $self->_fields = $fields if (defined $fields);
   $_->host($self) foreach (@$fields);
 
   if (defined $self->metadata('order')) {
     my @order = split('\s+', $self->metadata('order'));
-    foreach my $name (map { $_->name } @{$self->{'fields'}}) {
+    foreach my $name (map { $_->name } @{$self->_fields}) {
       push(@order, $name) if (!grep /^\Q$name\E$/, @order);
     }
 
@@ -70,34 +38,34 @@ sub fields {
     return \@new_fields;
   }
 
-  return $self->{'fields'};
+  return $self->_fields;
 }
 
 sub metadata {
   my ($self, $attr, $value) = @_;
 
   if (!defined $attr && !defined $value) {
-    return $self->{'metadata'};
+    return $self->_metadata;
   }
   elsif (!defined $value) {
-    my $str = $self->{'metadata'}->{$attr};
+    my $str = $self->_metadata->{$attr};
     if (defined $str && $str =~ /\$\{graph_(.*)\}/) {
-      my $replace = $self->{'metadata'}->{$1};
+      my $replace = $self->_metadata->{$1};
       $replace = 'second' if (!defined $replace && $1 eq 'period');
       $str =~ s/\$\{graph_\Q$1\E\}/$replace/g;
       return $str;
     }
-    return $self->{'metadata'}->{$attr};
+    return $self->_metadata->{$attr};
   }
   else {
-    $self->{'metadata'}->{$attr} = $value;
-    return $self->{'metadata'}->{$attr};
+    $self->_metadata->{$attr} = $value;
+    return $self->_metadata->{$attr};
   }
 }
 
 sub add_field {
   my ($self, $field) = @_;
-  push(@{$self->{'fields'}}, $field);
+  push(@{$self->_fields}, $field);
   $field->service($self);
   return;
 }
@@ -105,7 +73,7 @@ sub add_field {
 sub field_by_name {
   my ($self, $name) = @_;
 
-  foreach my $field (@{$self->{'fields'}}){
+  foreach my $field (@{$self->_fields}){
     if ($field->name eq $name) {
       return $field;
     }
@@ -115,14 +83,14 @@ sub field_by_name {
 
 sub add_child {
   my ($self, $child) = @_;
-  push(@{$self->{'children'}}, $child);
+  push(@{$self->children}, $child);
   return;
 }
 
 sub child_by_name {
   my ($self, $name) = @_;
 
-  foreach my $child (@{$self->{'children'}}){
+  foreach my $child (@{$self->children}){
     if ($child->name eq $name) {
       return $child;
     }
