@@ -5,7 +5,7 @@
 
 <%= include 'munin/zoom_modal'%>
 
-<div class="panel panel-default">
+<div class="panel panel-<%= $service->state->get_class %>">
   <div class="panel-heading text-capitalize">
     <div class='row'>
       <div class='col-md-11'>

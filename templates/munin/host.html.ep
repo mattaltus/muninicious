@@ -13,7 +13,7 @@
 </ul>
 &nbsp;
 % foreach my $service (sort { $a->metadata('title') cmp $b->metadata('title') } @{$host->get_services_by_metadata({'category' => $category})}) {
-<div class="panel panel-default">
+<div class="panel panel-<%= $service->state->get_class %>">
   <div class="panel-heading text-capitalize">
     <div class='row'>
       <div class='col-md-11'>
