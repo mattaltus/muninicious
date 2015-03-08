@@ -11,6 +11,7 @@ has name      => undef;
 has service   => undef;
 has _metadata => sub { return {} };
 has dbdir     => undef;
+has state     => undef;
 
 sub metadata {
   my ($self, $attr, $value) = @_;

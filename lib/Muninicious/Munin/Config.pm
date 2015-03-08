@@ -19,6 +19,7 @@ sub new {
   $self->{'dbdir'}    = $ENV{'MUNIN_DB_DIR'} || $self->get_param('dbdir');
   $self->{'datafile'} = Muninicious::Munin::Datafile->new({'dbdir' => $self->{'dbdir'}});
   $self->{'limits'}   = Muninicious::Munin::Limits->new({'dbdir' => $self->{'dbdir'}});
+  $self->{'limits'}->populate_state($self->{'datafile'});
 
   return $self;
 }

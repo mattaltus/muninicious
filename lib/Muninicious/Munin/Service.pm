@@ -143,4 +143,26 @@ sub get_data {
   return Muninicious::Munin::RRD::Data->new(service => $self);
 }
 
+sub state {
+  my ($self) = @_;
+
+  my $state;
+  foreach my $child (@{$self->children}) {
+    $state = $child->state if (!defined $state);
+    $state = $child->state if ($state < $child->state);
+  }
+  warn $state->state if (defined $state);
+  return $state if (defined $state);
+
+  foreach my $field (@{$self->_fields}) {
+    next if (!defined $field->state);
+    $state = $field->state if (!defined $state);
+    $state = $field->state if ($state < $field->state);
+  }
+  warn $state->state if (defined $state);
+  return $state if (defined $state);
+
+  return Muninicious::Muninicious::State->new(state => 'ok');
+}
+
 1;

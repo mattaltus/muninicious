@@ -114,4 +114,15 @@ sub get_page_url {
   return '/host/'.$self->group->name.'/'.$self->name;
 }
 
+sub state {
+  my ($self) = @_;
+
+  my $state;
+  foreach my $service (@{$self->services}) {
+    $state = $service->state if (!defined $state);
+    $state = $service->state if ($state < $service->state);
+  }
+  return $state;
+}
+
 1;
