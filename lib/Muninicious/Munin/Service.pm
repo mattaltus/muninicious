@@ -7,6 +7,7 @@ use Mojo::Base -base;
 
 use Muninicious::Munin::RRD::Graph;
 use Muninicious::Munin::RRD::Data;
+use Muninicious::Munin::State;
 
 has name      => undef;
 has host      => undef;
@@ -151,7 +152,6 @@ sub state {
     $state = $child->state if (!defined $state);
     $state = $child->state if ($state < $child->state);
   }
-  warn $state->state if (defined $state);
   return $state if (defined $state);
 
   foreach my $field (@{$self->_fields}) {
@@ -159,10 +159,9 @@ sub state {
     $state = $field->state if (!defined $state);
     $state = $field->state if ($state < $field->state);
   }
-  warn $state->state if (defined $state);
   return $state if (defined $state);
 
-  return Muninicious::Muninicious::State->new(state => 'ok');
+  return Muninicious::Munin::State->new(state => 'ok');
 }
 
 1;
